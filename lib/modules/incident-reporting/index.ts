@@ -41,6 +41,9 @@ const incidentReportingModule: SafetyModule = {
     },
   ],
 
+  // Optional: Minimum role required to access this module
+  minRole: 'employee', // Only employees and above can create/view incidents
+
   // Optional: Lifecycle hooks
   lifecycle: {
     onLoad: async () => {

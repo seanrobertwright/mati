@@ -1,4 +1,5 @@
 import { ComponentType } from 'react';
+import type { UserRole } from '@/lib/auth/permissions';
 
 /**
  * Props passed to module dashboard widgets
@@ -64,6 +65,9 @@ export interface SafetyModule {
 
   /** Optional navigation menu configuration */
   navigation?: ModuleNavigation[];
+
+  /** Optional minimum role required to access this module */
+  minRole?: UserRole;
 
   /** Optional lifecycle hooks */
   lifecycle?: {

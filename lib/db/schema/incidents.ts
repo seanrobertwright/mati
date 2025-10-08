@@ -11,6 +11,7 @@ export const incidents = pgTable('incidents', {
     enum: ['open', 'investigating', 'resolved', 'closed'] 
   }).notNull(),
   reportedBy: text('reported_by').notNull(),
+  userId: uuid('user_id').notNull(), // References auth.users(id) in Supabase
   reportedAt: timestamp('reported_at').defaultNow().notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

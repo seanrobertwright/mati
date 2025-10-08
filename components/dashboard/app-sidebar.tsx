@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Home } from "lucide-react"
+import type { User } from '@supabase/supabase-js';
 
 import { registry } from "@/lib/safety-framework"
 import {
@@ -15,10 +16,14 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  user: User;
+}
+
+export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname()
-  const modulesWithNav = registry.getModulesWithNavigation()
-  const moduleCount = registry.getModuleCount()
+  const modulesWithNav = registry.getModulesWithNavigationForUser(user)
+  const accessibleModuleCount = registry.getModulesForUser(user).length
 
   return (
     <Sidebar variant="inset">
@@ -81,7 +86,7 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <div className="p-2 text-xs text-sidebar-foreground/70">
-          {moduleCount} {moduleCount === 1 ? "module" : "modules"} loaded
+          {accessibleModuleCount} {accessibleModuleCount === 1 ? "module" : "modules"} available
         </div>
       </SidebarFooter>
     </Sidebar>

@@ -8,6 +8,13 @@
       "when": 1759937329734,
       "tag": "0000_known_whizzer",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1759945499292,
+      "tag": "0001_goofy_jocasta",
+      "breakpoints": true
     }
   ]
 }

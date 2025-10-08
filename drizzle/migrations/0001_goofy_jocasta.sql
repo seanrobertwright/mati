@@ -1,0 +1,1 @@
+ALTER TABLE "incidents" ADD COLUMN "user_id" uuid NOT NULL;

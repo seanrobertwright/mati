@@ -1,5 +1,7 @@
 import { SafetyModule } from './types';
 import { validateModule } from './validation';
+import { canAccessModule, type UserRole } from '@/lib/auth/permissions';
+import type { User } from '@supabase/supabase-js';
 
 /**
  * Central registry for all safety modules
@@ -61,6 +63,37 @@ class ModuleRegistry {
    */
   getModulesWithNavigation(): SafetyModule[] {
     return this.getAllModules().filter((m) => m.navigation && m.navigation.length > 0);
+  }
+
+  /**
+   * Get modules accessible to the given user
+   * Filters modules based on their minRole requirement
+   */
+  getModulesForUser(user: User | null): SafetyModule[] {
+    return this.getAllModules().filter((m) => canAccessModule(user, m.minRole));
+  }
+
+  /**
+   * Get modules with widgets accessible to the given user
+   */
+  getModulesWithWidgetsForUser(user: User | null): SafetyModule[] {
+    return this.getModulesForUser(user).filter((m) => m.dashboard.widget);
+  }
+
+  /**
+   * Get modules with navigation accessible to the given user
+   */
+  getModulesWithNavigationForUser(user: User | null): SafetyModule[] {
+    return this.getModulesForUser(user).filter((m) => m.navigation && m.navigation.length > 0);
+  }
+
+  /**
+   * Check if a user can access a specific module
+   */
+  canUserAccessModule(user: User | null, moduleId: string): boolean {
+    const module = this.getModule(moduleId);
+    if (!module) return false;
+    return canAccessModule(user, module.minRole);
   }
 
   /**

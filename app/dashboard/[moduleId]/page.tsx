@@ -1,13 +1,33 @@
 import { notFound } from 'next/navigation';
 import { registry } from '@/lib/safety-framework';
 import type { ModuleRouteProps } from '@/lib/safety-framework';
+import { createClient } from '@/lib/auth/server';
 
 export default async function ModulePage(props: ModuleRouteProps) {
   const params = await props.params;
+  
+  // Get the authenticated user
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  
   const safetyModule = registry.getModule(params.moduleId);
 
   if (!safetyModule) {
     notFound();
+  }
+
+  // Check if user has permission to access this module
+  if (!registry.canUserAccessModule(user, params.moduleId)) {
+    return (
+      <div className="bg-white rounded-lg border border-red-200 p-8">
+        <h1 className="text-2xl font-bold text-red-900 mb-2">Access Denied</h1>
+        <p className="text-gray-600">
+          You do not have permission to access this module. Contact your administrator if you believe this is an error.
+        </p>
+      </div>
+    );
   }
 
   if (!safetyModule.dashboard.route) {

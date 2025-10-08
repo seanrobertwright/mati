@@ -1,9 +1,17 @@
 import { registry } from '@/lib/safety-framework';
 import { ModuleCard, DashboardWidget } from '@/components/dashboard';
+import { createClient } from '@/lib/auth/server';
 
-export default function DashboardPage() {
-  const allModules = registry.getAllModules();
-  const modulesWithWidgets = registry.getModulesWithWidgets();
+export default async function DashboardPage() {
+  // Get the authenticated user
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Filter modules by user permissions
+  const allModules = registry.getModulesForUser(user);
+  const modulesWithWidgets = registry.getModulesWithWidgetsForUser(user);
 
   return (
     <div className="space-y-8">
