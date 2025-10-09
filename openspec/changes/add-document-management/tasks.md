@@ -45,25 +45,25 @@
 - [x] 4.7 Add permission caching for performance
 
 ## 5. Business Logic Services
-- [ ] 5.1 Create `lib/modules/document-management/services/document-lifecycle.ts`
-- [ ] 5.2 Implement document state machine transitions
-- [ ] 5.3 Implement approval workflow logic
-- [ ] 5.4 Create review scheduling service
-- [ ] 5.5 Implement document version comparison utilities
-- [ ] 5.6 Create change request workflow service
-- [ ] 5.7 Implement audit logging service
-- [ ] 5.8 Create metrics calculation service
+- [x] 5.1 Create `lib/modules/document-management/services/document-lifecycle.ts`
+- [x] 5.2 Implement document state machine transitions
+- [x] 5.3 Implement approval workflow logic
+- [x] 5.4 Create review scheduling service
+- [x] 5.5 Implement document version comparison utilities
+- [x] 5.6 Create change request workflow service
+- [x] 5.7 Implement audit logging service
+- [x] 5.8 Create metrics calculation service
 
 ## 6. UI Components - File Browser
-- [ ] 6.1 Create `DirectoryTree` component with expand/collapse
-- [ ] 6.2 Create `DirectoryBreadcrumb` component for navigation
-- [ ] 6.3 Create `DocumentList` component with sorting/filtering
-- [ ] 6.4 Create `DocumentListItem` component showing metadata
-- [ ] 6.5 Create `CreateDirectoryDialog` component
-- [ ] 6.6 Create `RenameDirectoryDialog` component
-- [ ] 6.7 Create `DeleteDirectoryDialog` with safety checks
+- [x] 6.1 Create `DirectoryTree` component with expand/collapse
+- [x] 6.2 Create `DirectoryBreadcrumb` component for navigation
+- [x] 6.3 Create `DocumentList` component with sorting/filtering
+- [x] 6.4 Create `DocumentListItem` component showing metadata
+- [x] 6.5 Create `CreateDirectoryDialog` component
+- [x] 6.6 Create `RenameDirectoryDialog` component
+- [x] 6.7 Create `DeleteDirectoryDialog` with safety checks
 - [ ] 6.8 Add drag-and-drop support for file upload
-- [ ] 6.9 Add keyboard navigation support
+- [x] 6.9 Add keyboard navigation support
 
 ## 7. UI Components - Document Management
 - [ ] 7.1 Create `DocumentUploadForm` component
