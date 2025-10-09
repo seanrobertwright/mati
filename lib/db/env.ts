@@ -4,7 +4,7 @@
  */
 
 export function validateEnv() {
-  const requiredEnvVars = ['DATABASE_URL'];
+  const requiredEnvVars = ['DATABASE_URL', 'DOCUMENT_STORAGE_PATH'];
   const missing: string[] = [];
 
   for (const envVar of requiredEnvVars) {
@@ -17,9 +17,22 @@ export function validateEnv() {
     throw new Error(
       `Missing required environment variables:\n${missing
         .map((v) => `  - ${v}`)
-        .join('\n')}\n\nPlease copy .env.local.example to .env.local and configure your Supabase credentials.`
+        .join('\n')}\n\nPlease copy .env.local.example to .env.local and configure your database and document storage.`
     );
   }
+}
+
+export function getDocumentStoragePath(): string {
+  const path = process.env.DOCUMENT_STORAGE_PATH;
+  if (!path) {
+    throw new Error('DOCUMENT_STORAGE_PATH environment variable is not set');
+  }
+  return path;
+}
+
+export function getMaxDocumentSize(): number {
+  const size = process.env.MAX_DOCUMENT_SIZE;
+  return size ? parseInt(size, 10) : 104857600; // Default 100MB
 }
 
 // Validate on module load

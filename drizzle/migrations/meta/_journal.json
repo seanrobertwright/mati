@@ -15,6 +15,20 @@
       "when": 1759945499292,
       "tag": "0001_goofy_jocasta",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760034894370,
+      "tag": "0002_mature_star_brand",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1760035395466,
+      "tag": "0003_exotic_iceman",
+      "breakpoints": true
     }
   ]
 }
