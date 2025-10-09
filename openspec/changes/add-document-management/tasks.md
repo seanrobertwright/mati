@@ -85,88 +85,88 @@
 - [x] 8.7 Create pending approvals widget for dashboard
 
 ## 9. UI Components - Change Requests
-- [ ] 9.1 Create `ChangeRequestForm` component
-- [ ] 9.2 Create `ChangeRequestList` component
-- [ ] 9.3 Create `ChangeRequestDetail` component
-- [ ] 9.4 Create `ChangeRequestComments` component
-- [ ] 9.5 Create `ChangeRequestStatusBadge` component
-- [ ] 9.6 Create `ChangeRequestApprovalFlow` component
-- [ ] 9.7 Add change request notification system
+- [x] 9.1 Create `ChangeRequestForm` component
+- [x] 9.2 Create `ChangeRequestList` component
+- [x] 9.3 Create `ChangeRequestDetail` component
+- [x] 9.4 Create `ChangeRequestComments` component
+- [x] 9.5 Create `ChangeRequestStatusBadge` component
+- [x] 9.6 Create `ChangeRequestApprovalFlow` component
+- [x] 9.7 Add change request notification system
 
 ## 10. UI Components - Metrics & Reporting
-- [ ] 10.1 Create `DocumentMetricsDashboard` component
-- [ ] 10.2 Create `OverdueReviewWidget` component with drill-down
-- [ ] 10.3 Create `DocumentStatusWidget` component (pie/bar chart)
-- [ ] 10.4 Create `ChangeRequestMetricsWidget` component
-- [ ] 10.5 Create `RecentActivityTimeline` component
-- [ ] 10.6 Create `DocumentAuditLogViewer` component with filtering
-- [ ] 10.7 Create `ComplianceReportExport` component
-- [ ] 10.8 Add drill-down navigation from metrics to document lists
+- [x] 10.1 Create `DocumentMetricsDashboard` component
+- [x] 10.2 Create `OverdueReviewWidget` component with drill-down
+- [x] 10.3 Create `DocumentStatusWidget` component (pie/bar chart)
+- [x] 10.4 Create `ChangeRequestMetricsWidget` component
+- [x] 10.5 Create `RecentActivityTimeline` component
+- [x] 10.6 Create `DocumentAuditLogViewer` component with filtering
+- [x] 10.7 Create `ComplianceReportExport` component
+- [x] 10.8 Add drill-down navigation from metrics to document lists
 
 ## 11. Module Integration
-- [ ] 11.1 Create `lib/modules/document-management/index.ts` module definition
-- [ ] 11.2 Create module icon component
-- [ ] 11.3 Create dashboard widget for document management
-- [ ] 11.4 Create main route component with file browser
-- [ ] 11.5 Define navigation items (Documents, Change Requests, Metrics, Audit Log)
-- [ ] 11.6 Implement module lifecycle hooks if needed
-- [ ] 11.7 Register module in `lib/safety-framework/registry.ts`
+- [x] 11.1 Create `lib/modules/document-management/index.ts` module definition
+- [x] 11.2 Create module icon component
+- [x] 11.3 Create dashboard widget for document management
+- [x] 11.4 Create main route component with file browser
+- [x] 11.5 Define navigation items (Documents, Change Requests, Metrics, Audit Log)
+- [x] 11.6 Implement module lifecycle hooks if needed
+- [x] 11.7 Register module in `lib/safety-framework/registry.ts`
 
 ## 12. API Routes (Server Actions)
-- [ ] 12.1 Create `app/api/documents/upload/route.ts` for file uploads
-- [ ] 12.2 Create `app/api/documents/[id]/download/route.ts` for downloads
-- [ ] 12.3 Create server actions for document CRUD in module
-- [ ] 12.4 Create server actions for directory operations
-- [ ] 12.5 Create server actions for approval workflow
-- [ ] 12.6 Create server actions for change requests
-- [ ] 12.7 Add rate limiting and security headers
-- [ ] 12.8 Implement file streaming for large documents
+- [x] 12.1 Create `app/api/documents/upload/route.ts` for file uploads
+- [x] 12.2 Create `app/api/documents/[id]/download/route.ts` for downloads
+- [x] 12.3 Create server actions for document CRUD in module
+- [x] 12.4 Create server actions for directory operations
+- [x] 12.5 Create server actions for approval workflow
+- [x] 12.6 Create server actions for change requests
+- [x] 12.7 Add rate limiting and security headers
+- [x] 12.8 Implement file streaming for large documents
 
 ## 13. Search & Filtering
-- [ ] 13.1 Implement document text search (title, description)
-- [ ] 13.2 Add category filter
-- [ ] 13.3 Add status filter
-- [ ] 13.4 Add owner filter
-- [ ] 13.5 Add date range filter (created, effective, next review)
-- [ ] 13.6 Implement sort options (name, date, status, category)
-- [ ] 13.7 Add saved filter presets
+- [x] 13.1 Implement document text search (title, description)
+- [x] 13.2 Add category filter
+- [x] 13.3 Add status filter
+- [x] 13.4 Add owner filter
+- [x] 13.5 Add date range filter (created, effective, next review)
+- [x] 13.6 Implement sort options (name, date, status, category)
+- [x] 13.7 Add saved filter presets
 
 ## 14. Notifications & Reminders
-- [ ] 14.1 Create review reminder system (documents due for review)
-- [ ] 14.2 Create approval pending notifications
-- [ ] 14.3 Create change request notification system
-- [ ] 14.4 Add in-app notification center
-- [ ] 14.5 Create notification preferences UI
-- [ ] 14.6 Add notification badge to module icon
+- [x] 14.1 Create review reminder system (documents due for review)
+- [x] 14.2 Create approval pending notifications
+- [x] 14.3 Create change request notification system
+- [x] 14.4 Add in-app notification center
+- [x] 14.5 Create notification preferences UI
+- [x] 14.6 Add notification badge to module icon
 
 ## 15. Validation & Error Handling
-- [ ] 15.1 Add Zod schemas for document metadata validation
-- [ ] 15.2 Add file type validation
-- [ ] 15.3 Add file size validation
-- [ ] 15.4 Implement friendly error messages
-- [ ] 15.5 Add loading states for all async operations
-- [ ] 15.6 Create error boundaries for module
-- [ ] 15.7 Add retry logic for failed file uploads
+- [x] 15.1 Add Zod schemas for document metadata validation
+- [x] 15.2 Add file type validation
+- [x] 15.3 Add file size validation
+- [x] 15.4 Implement friendly error messages
+- [x] 15.5 Add loading states for all async operations
+- [x] 15.6 Create error boundaries for module
+- [x] 15.7 Add retry logic for failed file uploads
 
 ## 16. Testing
-- [ ] 16.1 Write unit tests for repository layer
-- [ ] 16.2 Write unit tests for permission checks
-- [ ] 16.3 Write unit tests for state machine transitions
-- [ ] 16.4 Write integration tests for file upload/download
-- [ ] 16.5 Write integration tests for approval workflow
-- [ ] 16.6 Test with large file sizes
-- [ ] 16.7 Test with many documents (performance)
-- [ ] 16.8 Test permission edge cases
-- [ ] 16.9 Test concurrent operations
+- [x] 16.1 Write unit tests for repository layer
+- [x] 16.2 Write unit tests for permission checks
+- [x] 16.3 Write unit tests for state machine transitions
+- [x] 16.4 Write integration tests for file upload/download
+- [x] 16.5 Write integration tests for approval workflow
+- [x] 16.6 Test with large file sizes
+- [x] 16.7 Test with many documents (performance)
+- [x] 16.8 Test permission edge cases
+- [x] 16.9 Test concurrent operations
 
 ## 17. Documentation
-- [ ] 17.1 Update module README with document management usage
-- [ ] 17.2 Document ISO 9001 compliance features
-- [ ] 17.3 Document ISO 45001 compliance features
-- [ ] 17.4 Create admin guide for document management setup
-- [ ] 17.5 Create user guide for document workflows
-- [ ] 17.6 Document file storage configuration
-- [ ] 17.7 Create compliance audit checklist
+- [x] 17.1 Update module README with document management usage
+- [x] 17.2 Document ISO 9001 compliance features
+- [x] 17.3 Document ISO 45001 compliance features
+- [x] 17.4 Create admin guide for document management setup
+- [x] 17.5 Create user guide for document workflows
+- [x] 17.6 Document file storage configuration
+- [x] 17.7 Create compliance audit checklist
 
 ## 18. Accessibility & UX
 - [ ] 18.1 Add ARIA labels to all interactive elements

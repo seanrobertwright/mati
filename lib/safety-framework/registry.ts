@@ -158,6 +158,11 @@ export async function discoverModules(): Promise<void> {
       modules.push(incidentReporting.default);
     }
 
+    const documentManagement = await import('@/lib/modules/document-management');
+    if (documentManagement.default) {
+      modules.push(documentManagement.default);
+    }
+
     // Future modules can be added here:
     // const anotherModule = await import('@/lib/modules/another-module');
     // if (anotherModule.default) {
