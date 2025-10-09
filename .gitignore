@@ -33,6 +33,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# document storage (keep directory structure but ignore uploaded files)
+documents/*
+!documents/.gitkeep
+
 # vercel
 .vercel
 

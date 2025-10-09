@@ -66,23 +66,23 @@
 - [x] 6.9 Add keyboard navigation support
 
 ## 7. UI Components - Document Management
-- [ ] 7.1 Create `DocumentUploadForm` component
-- [ ] 7.2 Create `DocumentMetadataForm` component (category, owner, review frequency, etc.)
-- [ ] 7.3 Create `DocumentDetailView` component
-- [ ] 7.4 Create `DocumentVersionHistory` component
-- [ ] 7.5 Create `DocumentViewer` component (for supported file types)
-- [ ] 7.6 Create `DocumentDownloadButton` component
-- [ ] 7.7 Create `DocumentStatusBadge` component
-- [ ] 7.8 Create `DocumentPermissionsManager` component
+- [x] 7.1 Create `DocumentUploadForm` component
+- [x] 7.2 Create `DocumentMetadataForm` component (category, owner, review frequency, etc.)
+- [x] 7.3 Create `DocumentDetailView` component
+- [x] 7.4 Create `DocumentVersionHistory` component
+- [x] 7.5 Create `DocumentViewer` component (for supported file types)
+- [x] 7.6 Create `DocumentDownloadButton` component
+- [x] 7.7 Create `DocumentStatusBadge` component
+- [x] 7.8 Create `DocumentPermissionsManager` component
 
 ## 8. UI Components - Approval Workflow
-- [ ] 8.1 Create `ApprovalWorkflowCard` component showing current stage
-- [ ] 8.2 Create `ApprovalActionButtons` component (approve/reject)
-- [ ] 8.3 Create `ApprovalHistoryTimeline` component
-- [ ] 8.4 Create `AssignReviewerDialog` component
-- [ ] 8.5 Create `AssignApproverDialog` component
-- [ ] 8.6 Create `ApprovalNotesDialog` component
-- [ ] 8.7 Create pending approvals widget for dashboard
+- [x] 8.1 Create `ApprovalWorkflowCard` component showing current stage
+- [x] 8.2 Create `ApprovalActionButtons` component (approve/reject)
+- [x] 8.3 Create `ApprovalHistoryTimeline` component
+- [x] 8.4 Create `AssignReviewerDialog` component
+- [x] 8.5 Create `AssignApproverDialog` component
+- [x] 8.6 Create `ApprovalNotesDialog` component
+- [x] 8.7 Create pending approvals widget for dashboard
 
 ## 9. UI Components - Change Requests
 - [ ] 9.1 Create `ChangeRequestForm` component
