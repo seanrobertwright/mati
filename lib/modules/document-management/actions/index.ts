@@ -19,6 +19,7 @@ export {
   renameDirectory,
   deleteDirectory,
   getDirectoryTree,
+  getAllDirectories,
   moveDirectory,
 } from './directories';
 

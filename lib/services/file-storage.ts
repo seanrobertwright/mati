@@ -94,6 +94,9 @@ export async function saveToTemp(file: File): Promise<string> {
   const tempPath = path.join(tempDir, tempFileName);
 
   try {
+    // Ensure temp directory exists
+    await fs.mkdir(tempDir, { recursive: true });
+    
     // Read file as array buffer and write to temp
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(tempPath, buffer);

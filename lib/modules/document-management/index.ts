@@ -1,6 +1,7 @@
 import type { SafetyModule } from '@/lib/safety-framework';
 import DocumentWidget from './DocumentWidget';
 import DocumentRoute from './DocumentRoute';
+import DocumentRouteFallback from './DocumentRouteFallback';
 import DocumentIcon from './DocumentIcon';
 
 /**
@@ -88,9 +89,9 @@ export * from './errors';
 // Export components
 export * from './components';
 
-// Export actions
-export * from './actions';
+// Export actions (server actions for client components)
+export * as DocumentActions from './actions';
 
-// Export services
-export * from './services';
+// Export services (business logic)
+export * as DocumentServices from './services';
 

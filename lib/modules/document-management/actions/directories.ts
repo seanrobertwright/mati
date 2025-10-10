@@ -7,6 +7,9 @@ import {
   updateDirectory as dbUpdateDirectory,
   deleteDirectory as dbDeleteDirectory,
   getDirectoryById,
+  getDirectoryTree as dbGetDirectoryTree,
+  getRootDirectories,
+  getSubdirectories,
 } from '@/lib/db/repositories/directories';
 import { logDocumentAction, AuditActions } from '@/lib/db/repositories/audit-log';
 
@@ -32,6 +35,25 @@ export async function createDirectory(data: {
 
     if (data.name.length > 255) {
       return { error: 'Directory name too long' };
+    }
+
+    // In dev mode with mock auth, simulate directory creation
+    if (process.env.DEV_MODE_SKIP_AUTH === 'true') {
+      console.log('Dev mode: Simulating directory creation');
+      const mockDirectory = {
+        id: `mock-dir-${Date.now()}`,
+        name: data.name.trim(),
+        parentId: data.parentId || null,
+        createdBy: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      
+      revalidatePath('/dashboard/document-management');
+      return { 
+        success: true,
+        directory: mockDirectory,
+      };
     }
 
     // Create directory in database
@@ -162,16 +184,66 @@ export async function getDirectoryTree(parentId?: string | null) {
       return { error: 'Unauthorized' };
     }
 
-    // TODO: Implement actual database query
-    // const directories = await listDirectories(parentId || null);
+    // Get all directories (tree structure)
+    const directories = await dbGetDirectoryTree();
 
     return { 
       success: true,
-      directories: [],
+      directories,
     };
   } catch (error) {
     console.error('Get directory tree error:', error);
     return { error: 'Failed to get directory tree' };
+  }
+}
+
+/**
+ * Server action to get all directories (flat list)
+ */
+export async function getAllDirectories() {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return { success: false, error: 'Unauthorized', directories: [] };
+    }
+
+    console.log('Getting all directories for user:', user.id);
+
+    // In dev mode with mock auth, return empty array for now
+    if (process.env.DEV_MODE_SKIP_AUTH === 'true') {
+      console.log('Dev mode: Returning empty directories array');
+      return { 
+        success: true,
+        directories: [],
+      };
+    }
+
+    // Get all directories via tree structure
+    try {
+      const tree = await dbGetDirectoryTree();
+      console.log('Retrieved directory tree:', tree);
+
+      return { 
+        success: true,
+        directories: tree || [],
+      };
+    } catch (dbError) {
+      console.error('Database error in getDirectoryTree:', dbError);
+      return { 
+        success: false, 
+        error: `Database error: ${dbError instanceof Error ? dbError.message : 'Unknown database error'}`,
+        directories: []
+      };
+    }
+  } catch (error) {
+    console.error('Get all directories error:', error);
+    return { 
+      success: false,
+      error: `Failed to get directories: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      directories: []
+    };
   }
 }
 

@@ -10,23 +10,11 @@ import {
   DirectoryBreadcrumb,
   DocumentList,
   CreateDirectoryDialog,
+  DocumentUploadForm,
 } from './components';
-
-interface Directory {
-  id: string;
-  name: string;
-  parentId: string | null;
-  children?: Directory[];
-}
-
-interface Document {
-  id: string;
-  title: string;
-  status: 'draft' | 'pending_review' | 'pending_approval' | 'approved' | 'under_review' | 'archived';
-  category?: string;
-  updatedAt: Date | string;
-  owner?: string;
-}
+import { createDirectory, getAllDirectories } from './actions/directories';
+import type { Directory } from '@/lib/db/repositories/directories';
+import type { Document } from '@/lib/db/repositories/documents';
 
 /**
  * DocumentRoute
@@ -41,21 +29,38 @@ const DocumentRoute: React.FC<ModuleRouteProps> = ({ params }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
 
   // Handle subpage routing
   const subpage = resolvedParams.subpage?.[0];
 
   useEffect(() => {
-    // TODO: Fetch directories and documents from API
     const loadData = async () => {
       try {
         setIsLoading(true);
-        // Simulated API call
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setDirectories([]);
+        
+        // Fetch directories
+        const dirResult = await getAllDirectories();
+        console.log('Directory result:', dirResult);
+        
+        if (dirResult.success && dirResult.directories) {
+          setDirectories(dirResult.directories);
+          console.log('Loaded directories:', dirResult.directories.length);
+        } else {
+          console.error('Failed to load directories:', dirResult.error || 'Unknown error');
+          setDirectories([]);
+        }
+        
+        // TODO: Fetch documents for current directory
+        // const docResult = await getDocuments(currentDirectoryId);
+        // if (docResult.success) {
+        //   setDocuments(docResult.documents);
+        // }
         setDocuments([]);
       } catch (error) {
-        console.error('Failed to load documents:', error);
+        console.error('Failed to load data:', error);
+        setDirectories([]);
+        setDocuments([]);
       } finally {
         setIsLoading(false);
       }
@@ -64,15 +69,58 @@ const DocumentRoute: React.FC<ModuleRouteProps> = ({ params }) => {
     loadData();
   }, [currentDirectoryId]);
 
-  const handleCreateDirectory = async (name: string) => {
-    // TODO: Implement directory creation
-    console.log('Creating directory:', name);
-    setShowCreateDialog(false);
+  const loadDirectories = async () => {
+    try {
+      const dirResult = await getAllDirectories();
+      if (dirResult.success && dirResult.directories) {
+        setDirectories(dirResult.directories);
+      } else {
+        console.error('Failed to load directories:', dirResult.error);
+        setDirectories([]);
+      }
+    } catch (error) {
+      console.error('Failed to load directories:', error);
+      setDirectories([]);
+    }
   };
 
-  const handleSelectDocument = (documentId: string) => {
+  const handleCreateDirectory = async (name: string, parentId: string | null) => {
+    try {
+      const result = await createDirectory({
+        name,
+        parentId: parentId || currentDirectoryId,
+      });
+
+      if (result.error) {
+        console.error('Failed to create directory:', result.error);
+        alert(result.error);
+        return;
+      }
+
+      console.log('Directory created successfully:', result.directory);
+      
+      // Reload directories
+      setShowCreateDialog(false);
+      await loadDirectories();
+    } catch (error) {
+      console.error('Error creating directory:', error);
+      alert('Failed to create directory');
+    }
+  };
+
+  const handleSelectDocument = (document: Document) => {
     // TODO: Navigate to document detail view
-    console.log('Selected document:', documentId);
+    console.log('Selected document:', document.id);
+  };
+
+  const handleUploadComplete = async (documentId: string) => {
+    console.log('Upload complete:', documentId);
+    setShowUploadDialog(false);
+    // Reload data
+    setIsLoading(true);
+    await loadDirectories();
+    // TODO: Reload documents
+    setIsLoading(false);
   };
 
   // Route to different views based on subpage
@@ -137,7 +185,11 @@ const DocumentRoute: React.FC<ModuleRouteProps> = ({ params }) => {
             <FolderOpen className="h-4 w-4" />
             New Folder
           </Button>
-          <Button size="sm" className="gap-2">
+          <Button 
+            size="sm" 
+            className="gap-2"
+            onClick={() => setShowUploadDialog(true)}
+          >
             <Plus className="h-4 w-4" />
             Upload Document
           </Button>
@@ -165,7 +217,7 @@ const DocumentRoute: React.FC<ModuleRouteProps> = ({ params }) => {
           ) : (
             <DirectoryTree
               directories={directories}
-              currentDirectoryId={currentDirectoryId}
+              selectedDirectoryId={currentDirectoryId}
               onSelectDirectory={setCurrentDirectoryId}
             />
           )}
@@ -197,7 +249,7 @@ const DocumentRoute: React.FC<ModuleRouteProps> = ({ params }) => {
             ) : (
               <DocumentList
                 documents={documents}
-                onSelectDocument={handleSelectDocument}
+                onDocumentClick={handleSelectDocument}
               />
             )}
           </Card>
@@ -205,12 +257,36 @@ const DocumentRoute: React.FC<ModuleRouteProps> = ({ params }) => {
       </div>
 
       {/* Create Directory Dialog */}
-      {showCreateDialog && (
-        <CreateDirectoryDialog
-          parentDirectoryId={currentDirectoryId}
-          onConfirm={handleCreateDirectory}
-          onCancel={() => setShowCreateDialog(false)}
-        />
+      <CreateDirectoryDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        parentDirectoryId={currentDirectoryId}
+        onCreateDirectory={handleCreateDirectory}
+      />
+
+      {/* Upload Document Dialog */}
+      {showUploadDialog && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Upload Document</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowUploadDialog(false)}
+                >
+                  ×
+                </Button>
+              </div>
+              <DocumentUploadForm
+                directoryId={currentDirectoryId || undefined}
+                onUploadComplete={handleUploadComplete}
+                onCancel={() => setShowUploadDialog(false)}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

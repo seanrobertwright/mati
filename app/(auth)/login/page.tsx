@@ -5,11 +5,12 @@ export const metadata = {
   description: 'Sign in to your safety management account',
 };
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { redirectTo?: string };
+  searchParams: Promise<{ redirectTo?: string }>;
 }) {
-  return <LoginForm redirectTo={searchParams.redirectTo} />;
+  const params = await searchParams;
+  return <LoginForm redirectTo={params.redirectTo} />;
 }
 

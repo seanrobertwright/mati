@@ -15,7 +15,7 @@ export interface DirectoryWithChildren extends Directory {
  * Create a new directory
  */
 export async function createDirectory(
-  data: Omit<NewDirectory, 'id' | 'createdAt' | 'updatedAt'>,
+  data: Omit<NewDirectory, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>,
   user: User
 ): Promise<Directory> {
   try {
@@ -125,8 +125,51 @@ export async function getDirectoryTree(rootId?: string): Promise<DirectoryWithCh
     const result = await db.execute(query);
     return result.rows as DirectoryWithChildren[];
   } catch (error) {
-    console.error('Error fetching directory tree:', error);
-    throw new Error('Failed to fetch directory tree');
+    console.error('Error getting directory tree:', error);
+    console.log('Falling back to simple query...');
+    
+    // Fallback: use simple Drizzle query
+    try {
+      const allDirectories = await db
+        .select()
+        .from(directories)
+        .orderBy(directories.name);
+
+      console.log('Raw directories from DB:', allDirectories.length);
+      
+      // Build tree structure
+      const directoryMap = new Map<string, DirectoryWithChildren>();
+      const rootDirectories: DirectoryWithChildren[] = [];
+
+      // First pass: create all directory objects
+      allDirectories.forEach(dir => {
+        directoryMap.set(dir.id, {
+          ...dir,
+          children: [],
+          documentCount: 0,
+        });
+      });
+
+      // Second pass: build parent-child relationships
+      allDirectories.forEach(dir => {
+        const directoryWithChildren = directoryMap.get(dir.id)!;
+        
+        if (dir.parentId) {
+          const parent = directoryMap.get(dir.parentId);
+          if (parent) {
+            parent.children!.push(directoryWithChildren);
+          }
+        } else {
+          rootDirectories.push(directoryWithChildren);
+        }
+      });
+
+      console.log('Built tree with', rootDirectories.length, 'root directories');
+      return rootDirectories;
+    } catch (fallbackError) {
+      console.error('Fallback query also failed:', fallbackError);
+      throw new Error('Failed to get directory tree');
+    }
   }
 }
 

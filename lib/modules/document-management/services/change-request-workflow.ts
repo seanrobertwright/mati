@@ -494,7 +494,7 @@ export async function getChangeRequestWorkflowStage(
 /**
  * Calculate average approval time for change requests
  */
-export async function getChangeRequestMetrics(): Promise<{
+export async function getChangeRequestWorkflowMetrics(): Promise<{
   totalChangeRequests: number;
   byStatus: Record<string, number>;
   averageApprovalTime: number; // in days

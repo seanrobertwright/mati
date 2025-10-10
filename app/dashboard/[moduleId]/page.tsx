@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { registry } from '@/lib/safety-framework';
+import { registry, initializeModules } from '@/lib/safety-framework';
 import type { ModuleRouteProps } from '@/lib/safety-framework';
 import { createClient } from '@/lib/auth/server';
 
@@ -12,9 +12,23 @@ export default async function ModulePage(props: ModuleRouteProps) {
     data: { user },
   } = await supabase.auth.getUser();
   
+  // Ensure modules are initialized
+  if (!registry.isInitialized()) {
+    try {
+      await initializeModules();
+    } catch (error) {
+      console.error('Failed to initialize modules:', error);
+      // Continue anyway - maybe some modules loaded
+    }
+  }
+  
   const safetyModule = registry.getModule(params.moduleId);
 
   if (!safetyModule) {
+    console.error(`Module '${params.moduleId}' not found in registry.`);
+    console.log('Registry initialized:', registry.isInitialized());
+    console.log('Available modules:', registry.getAllModules().map(m => m.id));
+    console.log('Module count:', registry.getModuleCount());
     notFound();
   }
 

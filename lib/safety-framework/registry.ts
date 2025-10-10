@@ -18,9 +18,10 @@ class ModuleRegistry {
     // Validate the module
     validateModule(module);
 
-    // Check for duplicate IDs
+    // Check for duplicate IDs - skip if already registered
     if (this.modules.has(module.id)) {
-      throw new Error(`Module with id '${module.id}' is already registered`);
+      console.warn(`Module with id '${module.id}' is already registered, skipping`);
+      return;
     }
 
     this.modules.set(module.id, module);
@@ -142,12 +143,10 @@ export const registry = new ModuleRegistry();
  */
 export async function discoverModules(): Promise<void> {
   if (registry.isInitialized()) {
+    console.log('Modules already initialized, skipping discovery');
     return;
   }
 
-  // Import all module files from lib/modules
-  // In a real implementation, this would use dynamic imports or a build-time plugin
-  // For now, we'll manually import modules as they're created
   const modules: SafetyModule[] = [];
 
   try {
@@ -156,11 +155,13 @@ export async function discoverModules(): Promise<void> {
     const incidentReporting = await import('@/lib/modules/incident-reporting');
     if (incidentReporting.default) {
       modules.push(incidentReporting.default);
+      console.log('Loaded incident-reporting module');
     }
 
     const documentManagement = await import('@/lib/modules/document-management');
     if (documentManagement.default) {
       modules.push(documentManagement.default);
+      console.log('Loaded document-management module');
     }
 
     // Future modules can be added here:
@@ -171,6 +172,12 @@ export async function discoverModules(): Promise<void> {
   } catch (error) {
     // If modules don't exist yet, that's okay
     console.warn('Error loading modules:', error);
+  }
+
+  if (modules.length === 0) {
+    console.warn('No modules were loaded during discovery');
+  } else {
+    console.log(`Loaded ${modules.length} modules:`, modules.map(m => m.id));
   }
 
   registry.registerAll(modules);
