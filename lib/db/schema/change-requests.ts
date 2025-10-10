@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid, index } from 'drizzle-orm/pg-core';
 import { documents } from './documents';
 
 export const changeRequests = pgTable('change_requests', {
@@ -16,7 +16,15 @@ export const changeRequests = pgTable('change_requests', {
   implementedVersionId: uuid('implemented_version_id'), // References document_versions.id when implemented
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  // Indexes for change request queries
+  documentIdx: index('change_requests_document_id_idx').on(table.documentId),
+  requestedByIdx: index('change_requests_requested_by_idx').on(table.requestedBy),
+  statusIdx: index('change_requests_status_idx').on(table.status),
+  priorityIdx: index('change_requests_priority_idx').on(table.priority),
+  // Composite index for filtering by document and status
+  documentStatusIdx: index('change_requests_document_status_idx').on(table.documentId, table.status),
+}));
 
 export const changeRequestComments = pgTable('change_request_comments', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -24,7 +32,10 @@ export const changeRequestComments = pgTable('change_request_comments', {
   userId: uuid('user_id').notNull(), // References auth.users(id) in Supabase
   comment: text('comment').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  // Index for comment lookups
+  changeRequestIdx: index('change_request_comments_change_request_id_idx').on(table.changeRequestId),
+}));
 
 export const changeRequestApprovals = pgTable('change_request_approvals', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -36,5 +47,10 @@ export const changeRequestApprovals = pgTable('change_request_approvals', {
   notes: text('notes'),
   decidedAt: timestamp('decided_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  // Indexes for approval queries
+  changeRequestIdx: index('change_request_approvals_change_request_id_idx').on(table.changeRequestId),
+  approverIdx: index('change_request_approvals_approver_id_idx').on(table.approverId),
+  statusIdx: index('change_request_approvals_status_idx').on(table.status),
+}));
 

@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, integer } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid, integer, index } from 'drizzle-orm/pg-core';
 import { directories } from './directories';
 
 export const documentCategories = pgTable('document_categories', {
@@ -25,7 +25,18 @@ export const documents = pgTable('documents', {
   nextReviewDate: timestamp('next_review_date'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  // Indexes for common query patterns
+  statusIdx: index('documents_status_idx').on(table.status),
+  ownerIdx: index('documents_owner_id_idx').on(table.ownerId),
+  directoryIdx: index('documents_directory_id_idx').on(table.directoryId),
+  categoryIdx: index('documents_category_id_idx').on(table.categoryId),
+  nextReviewDateIdx: index('documents_next_review_date_idx').on(table.nextReviewDate),
+  createdAtIdx: index('documents_created_at_idx').on(table.createdAt),
+  updatedAtIdx: index('documents_updated_at_idx').on(table.updatedAt),
+  // Composite index for filtering by directory and status
+  directoryStatusIdx: index('documents_directory_status_idx').on(table.directoryId, table.status),
+}));
 
 export const documentVersions = pgTable('document_versions', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -39,7 +50,11 @@ export const documentVersions = pgTable('document_versions', {
   uploadedBy: uuid('uploaded_by').notNull(), // References auth.users(id) in Supabase
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  // Index for version lookups
+  documentIdx: index('document_versions_document_id_idx').on(table.documentId),
+  fileHashIdx: index('document_versions_file_hash_idx').on(table.fileHash),
+}));
 
 export const documentPermissions = pgTable('document_permissions', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -50,7 +65,11 @@ export const documentPermissions = pgTable('document_permissions', {
   }).notNull(),
   grantedBy: uuid('granted_by').notNull(), // References auth.users(id) in Supabase
   grantedAt: timestamp('granted_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  // Composite index for permission checks
+  documentUserIdx: index('document_permissions_document_user_idx').on(table.documentId, table.userId),
+  userIdx: index('document_permissions_user_id_idx').on(table.userId),
+}));
 
 export const documentApprovals = pgTable('document_approvals', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -66,5 +85,12 @@ export const documentApprovals = pgTable('document_approvals', {
   notes: text('notes'),
   decidedAt: timestamp('decided_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  // Indexes for approval queries
+  documentIdx: index('document_approvals_document_id_idx').on(table.documentId),
+  approverIdx: index('document_approvals_approver_id_idx').on(table.approverId),
+  statusIdx: index('document_approvals_status_idx').on(table.status),
+  // Composite index for finding pending approvals by user
+  approverStatusIdx: index('document_approvals_approver_status_idx').on(table.approverId, table.status),
+}));
 

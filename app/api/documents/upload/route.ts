@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUser } from '@/lib/auth/server';
-import { uploadFile } from '@/lib/services/file-storage';
-import { createDocument } from '@/lib/db/repositories/documents';
+import { createClient } from '@/lib/auth/server';
+import { saveToTemp, storeFile } from '@/lib/services/file-storage';
+import { createDocument, createDocumentVersion } from '@/lib/db/repositories/documents';
+import { logDocumentAction, AuditActions } from '@/lib/db/repositories/audit-log';
 
 /**
  * POST /api/documents/upload
@@ -12,7 +13,9 @@ import { createDocument } from '@/lib/db/repositories/documents';
 export async function POST(request: NextRequest) {
   try {
     // Authenticate user
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -53,31 +56,60 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Validate file type against allowed types
-
-    // Upload file to storage
-    const fileBuffer = Buffer.from(await file.arrayBuffer());
-    const uploadResult = await uploadFile(fileBuffer, file.name, file.type);
+    // Save file to temp storage
+    const tempPath = await saveToTemp(file);
 
     // Create document record in database
-    // TODO: Implement createDocument repository function
-    // const document = await createDocument({
-    //   title: title.trim(),
-    //   directoryId: directoryId || null,
-    //   categoryId: categoryId || null,
-    //   description: description?.trim() || null,
-    //   ownerId: user.id,
-    //   currentVersionId: null, // Will be set after creating version
-    //   status: 'draft',
-    // });
+    const document = await createDocument({
+      title: title.trim(),
+      directoryId: directoryId || null,
+      categoryId: categoryId || null,
+      description: description?.trim() || null,
+    }, user);
+
+    // Store file permanently and get file info
+    const fileResult = await storeFile(
+      tempPath,
+      document.id,
+      1, // version number
+      file.name,
+      user.id
+    );
+
+    // Create document version record
+    const version = await createDocumentVersion(
+      document.id,
+      {
+        filePath: fileResult.filePath,
+        fileName: fileResult.fileName,
+        fileHash: fileResult.fileHash,
+        fileSize: fileResult.fileSize,
+        mimeType: fileResult.mimeType,
+        versionNumber: 1,
+        uploadedBy: user.id,
+      },
+      user,
+      true // update current version
+    );
+
+    // Log the upload action
+    await logDocumentAction(
+      AuditActions.DOCUMENT_CREATED,
+      user.id,
+      document.id,
+      { 
+        title: document.title,
+        fileName: fileResult.fileName,
+        fileSize: fileResult.fileSize,
+        versionId: version.id 
+      }
+    );
 
     return NextResponse.json({
       success: true,
-      // document,
-      file: {
-        path: uploadResult.path,
-        hash: uploadResult.hash,
-        size: uploadResult.size,
+      document: {
+        ...document,
+        currentVersion: version,
       },
     }, {
       status: 201,

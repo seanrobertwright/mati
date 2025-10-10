@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getUser } from '@/lib/auth/server';
+import { createClient } from '@/lib/auth/server';
 import { getDocumentById } from '@/lib/db/repositories/documents';
 import { canApproveDocument } from '@/lib/auth/permissions';
 import { createAuditLog } from '@/lib/db/repositories/audit-log';
@@ -12,7 +12,9 @@ import { transitionDocumentState } from '@/lib/modules/document-management/servi
  */
 export async function submitForReview(documentId: string, reviewerId: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -55,7 +57,9 @@ export async function submitForReview(documentId: string, reviewerId: string) {
  */
 export async function approveReview(documentId: string, notes?: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -99,7 +103,9 @@ export async function approveReview(documentId: string, notes?: string) {
  */
 export async function requestChanges(documentId: string, notes: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -141,7 +147,9 @@ export async function requestChanges(documentId: string, notes: string) {
  */
 export async function approveDocument(documentId: string, notes?: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -184,7 +192,9 @@ export async function approveDocument(documentId: string, notes?: string) {
  */
 export async function rejectDocument(documentId: string, notes: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -231,7 +241,9 @@ export async function rejectDocument(documentId: string, notes: string) {
  */
 export async function assignReviewer(documentId: string, reviewerId: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -260,7 +272,9 @@ export async function assignReviewer(documentId: string, reviewerId: string) {
  */
 export async function assignApprover(documentId: string, approverId: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }

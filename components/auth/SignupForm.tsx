@@ -58,7 +58,9 @@ export default function SignupForm() {
       setSuccess(true);
       setLoading(false);
     } catch (err) {
-      setError('An unexpected error occurred');
+      console.error('Signup error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(errorMessage);
       setLoading(false);
     }
   };

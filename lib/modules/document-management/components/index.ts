@@ -100,3 +100,8 @@ export {
   CardSkeleton
 } from './LoadingStates';
 
+// Utility components
+export { Tooltip } from './Tooltip';
+export { OnboardingTour, defaultDocumentManagementTour } from './OnboardingTour';
+export { Pagination } from './Pagination';
+

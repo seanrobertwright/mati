@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getUser } from '@/lib/auth/server';
+import { createClient } from '@/lib/auth/server';
 import {
   createChangeRequest as dbCreateChangeRequest,
   updateChangeRequest as dbUpdateChangeRequest,
@@ -20,7 +20,9 @@ export async function createChangeRequest(data: {
   priority?: 'low' | 'medium' | 'high' | 'critical';
 }) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -76,7 +78,9 @@ export async function updateChangeRequest(
   }
 ) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -118,7 +122,9 @@ export async function updateChangeRequest(
  */
 export async function submitChangeRequest(changeRequestId: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -149,7 +155,9 @@ export async function submitChangeRequest(changeRequestId: string) {
  */
 export async function approveChangeRequest(changeRequestId: string, notes?: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -189,7 +197,9 @@ export async function approveChangeRequest(changeRequestId: string, notes?: stri
  */
 export async function rejectChangeRequest(changeRequestId: string, notes: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -227,7 +237,9 @@ export async function rejectChangeRequest(changeRequestId: string, notes: string
  */
 export async function addChangeRequestComment(changeRequestId: string, comment: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -257,7 +269,9 @@ export async function addChangeRequestComment(changeRequestId: string, comment: 
  */
 export async function getChangeRequests(documentId?: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -286,7 +300,9 @@ export async function markChangeRequestImplemented(
   implementedVersionId: string
 ) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }

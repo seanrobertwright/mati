@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import type { Document } from '@/lib/db/repositories/documents';
 import { DocumentListItem } from './DocumentListItem';
+import { Pagination } from './Pagination';
 
 type SortField = 'title' | 'createdAt' | 'updatedAt' | 'status' | 'nextReviewDate';
 type SortOrder = 'asc' | 'desc';
@@ -44,16 +45,18 @@ const SortButton: React.FC<SortButtonProps> = ({
       size="sm"
       className="h-8 gap-1"
       onClick={() => onSort(field)}
+      aria-label={`Sort by ${label}${isActive ? `, currently ${currentOrder === 'asc' ? 'ascending' : 'descending'}` : ''}`}
+      aria-pressed={isActive}
     >
       <span>{label}</span>
       {isActive ? (
         currentOrder === 'asc' ? (
-          <ArrowUp className="h-3 w-3" />
+          <ArrowUp className="h-3 w-3" aria-hidden="true" />
         ) : (
-          <ArrowDown className="h-3 w-3" />
+          <ArrowDown className="h-3 w-3" aria-hidden="true" />
         )
       ) : (
-        <ArrowUpDown className="h-3 w-3 opacity-50" />
+        <ArrowUpDown className="h-3 w-3 opacity-50" aria-hidden="true" />
       )}
     </Button>
   );
@@ -72,6 +75,8 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   const [sortField, setSortField] = useState<SortField>('updatedAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   const handleSort = useCallback((field: SortField) => {
     setSortField((currentField) => {
@@ -84,7 +89,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
     });
   }, []);
 
-  const filteredAndSortedDocuments = useMemo(() => {
+  const { filteredAndSortedDocuments, paginatedDocuments, totalPages } = useMemo(() => {
     let filtered = documents;
 
     // Filter by search query
@@ -132,8 +137,33 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       return 0;
     });
 
-    return sorted;
-  }, [documents, searchQuery, sortField, sortOrder]);
+    // Paginate
+    const totalPages = Math.ceil(sorted.length / pageSize);
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginated = sorted.slice(startIndex, endIndex);
+
+    return {
+      filteredAndSortedDocuments: sorted,
+      paginatedDocuments: paginated,
+      totalPages,
+    };
+  }, [documents, searchQuery, sortField, sortOrder, currentPage, pageSize]);
+
+  // Reset to page 1 when search or sort changes
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  }, []);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const handlePageSizeChange = useCallback((size: number) => {
+    setPageSize(size);
+    setCurrentPage(1);
+  }, []);
 
   if (documents.length === 0) {
     return (
@@ -152,10 +182,11 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       {/* Search and Sort Controls */}
       <div className="flex items-center gap-2 flex-wrap">
         <input
-          type="text"
+          type="search"
           placeholder="Search documents..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          aria-label="Search documents by title or description"
           className={cn(
             'flex-1 min-w-[200px] px-3 py-2 text-sm rounded-md border border-input',
             'bg-background ring-offset-background',
@@ -203,7 +234,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
 
       {/* Document List */}
       {filteredAndSortedDocuments.length === 0 ? (
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
               No documents match your search
@@ -211,26 +242,35 @@ export const DocumentList: React.FC<DocumentListProps> = ({
           </div>
         </div>
       ) : (
-        <div className="space-y-1">
-          {filteredAndSortedDocuments.map((document) => (
-            <DocumentListItem
-              key={document.id}
-              document={document}
-              onClick={() => onDocumentClick(document)}
-              isSelected={selectedDocumentId === document.id}
-              showCategory={showCategory}
-              showOwner={showOwner}
-              showStatus={showStatus}
-              showReviewDate={showReviewDate}
-            />
-          ))}
-        </div>
-      )}
+        <>
+          <div className="space-y-1" role="list" aria-label="Document list">
+            {paginatedDocuments.map((document) => (
+              <DocumentListItem
+                key={document.id}
+                document={document}
+                onClick={() => onDocumentClick(document)}
+                isSelected={selectedDocumentId === document.id}
+                showCategory={showCategory}
+                showOwner={showOwner}
+                showStatus={showStatus}
+                showReviewDate={showReviewDate}
+              />
+            ))}
+          </div>
 
-      {/* Results count */}
-      <div className="text-xs text-muted-foreground">
-        Showing {filteredAndSortedDocuments.length} of {documents.length} documents
-      </div>
+          {/* Pagination */}
+          {filteredAndSortedDocuments.length > pageSize && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={pageSize}
+              totalItems={filteredAndSortedDocuments.length}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 };

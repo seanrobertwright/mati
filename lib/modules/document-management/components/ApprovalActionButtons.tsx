@@ -168,8 +168,9 @@ export const ApprovalActionButtons: React.FC<ApprovalActionButtonsProps> = ({
             onClick={() => handleActionClick('approve')}
             disabled={isProcessing}
             className="gap-2"
+            aria-label={role === 'reviewer' ? 'Approve review and send to next stage' : 'Approve this document'}
           >
-            <CheckCircle className="h-4 w-4" />
+            <CheckCircle className="h-4 w-4" aria-hidden="true" />
             {approveLabel || (role === 'reviewer' ? 'Approve Review' : 'Approve')}
           </Button>
         )}
@@ -181,8 +182,9 @@ export const ApprovalActionButtons: React.FC<ApprovalActionButtonsProps> = ({
             onClick={() => handleActionClick('request_changes')}
             disabled={isProcessing}
             className="gap-2"
+            aria-label="Request changes and send back to author with feedback"
           >
-            <MessageSquare className="h-4 w-4" />
+            <MessageSquare className="h-4 w-4" aria-hidden="true" />
             Request Changes
           </Button>
         )}
@@ -193,8 +195,9 @@ export const ApprovalActionButtons: React.FC<ApprovalActionButtonsProps> = ({
             onClick={() => handleActionClick('reject')}
             disabled={isProcessing}
             className="gap-2"
+            aria-label="Reject and send back to draft"
           >
-            <XCircle className="h-4 w-4" />
+            <XCircle className="h-4 w-4" aria-hidden="true" />
             {rejectLabel || 'Reject'}
           </Button>
         )}
@@ -202,13 +205,19 @@ export const ApprovalActionButtons: React.FC<ApprovalActionButtonsProps> = ({
 
       {/* Notes Dialog */}
       {showNotesDialog && pendingAction && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="approval-dialog-title"
+          aria-describedby="approval-dialog-description"
+        >
           <div className="bg-background rounded-lg shadow-lg max-w-md w-full p-6">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-2">
+              <h3 id="approval-dialog-title" className="text-lg font-semibold mb-2">
                 {getActionConfig(pendingAction).label}
               </h3>
-              <p className="text-sm text-muted-foreground">
+              <p id="approval-dialog-description" className="text-sm text-muted-foreground">
                 {getActionConfig(pendingAction).description}
               </p>
             </div>

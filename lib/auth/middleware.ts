@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { isDevMockAuthEnabled, getDevMockUser } from './dev-mock';
 
 /**
  * Create a Supabase client for use in Middleware
@@ -9,6 +10,13 @@ export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
+
+  // Dev mode: Use mock auth
+  if (isDevMockAuthEnabled()) {
+    const user = getDevMockUser();
+    // Allow all requests with mock user
+    return supabaseResponse;
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,9 +43,18 @@ export async function updateSession(request: NextRequest) {
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  
+  try {
+    const {
+      data: { user: authenticatedUser },
+    } = await supabase.auth.getUser();
+    user = authenticatedUser;
+  } catch (error) {
+    // Handle fetch errors gracefully - don't block requests
+    console.error('Middleware auth check failed:', error);
+    // Continue without user - auth pages will still work
+  }
 
   // If user is not signed in and the current path is protected, redirect to login
   if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {

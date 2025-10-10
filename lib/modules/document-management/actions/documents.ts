@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getUser } from '@/lib/auth/server';
+import { createClient } from '@/lib/auth/server';
 import { 
   createDocument as dbCreateDocument,
   updateDocument as dbUpdateDocument,
@@ -24,7 +24,9 @@ export async function createDocument(data: {
   reviewFrequencyDays?: number;
 }) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -69,7 +71,9 @@ export async function updateDocument(
   }
 ) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -112,7 +116,9 @@ export async function updateDocument(
  */
 export async function deleteDocument(documentId: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -151,7 +157,9 @@ export async function deleteDocument(documentId: string) {
  */
 export async function getDocument(documentId: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -182,7 +190,9 @@ export async function getDocument(documentId: string) {
  */
 export async function getDocuments(directoryId?: string | null) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }

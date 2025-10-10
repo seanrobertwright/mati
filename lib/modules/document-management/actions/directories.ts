@@ -1,15 +1,14 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getUser } from '@/lib/auth/server';
+import { createClient } from '@/lib/auth/server';
 import {
   createDirectory as dbCreateDirectory,
   updateDirectory as dbUpdateDirectory,
   deleteDirectory as dbDeleteDirectory,
   getDirectoryById,
-  listDirectories,
 } from '@/lib/db/repositories/directories';
-import { createAuditLog } from '@/lib/db/repositories/audit-log';
+import { logDocumentAction, AuditActions } from '@/lib/db/repositories/audit-log';
 
 /**
  * Server action to create a new directory
@@ -19,7 +18,9 @@ export async function createDirectory(data: {
   parentId?: string | null;
 }) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -33,25 +34,25 @@ export async function createDirectory(data: {
       return { error: 'Directory name too long' };
     }
 
-    // TODO: Implement actual database operation
-    // const directory = await dbCreateDirectory({
-    //   name: data.name.trim(),
-    //   parentId: data.parentId || null,
-    //   createdBy: user.id,
-    // });
+    // Create directory in database
+    const directory = await dbCreateDirectory({
+      name: data.name.trim(),
+      parentId: data.parentId || null,
+    }, user);
 
-    // await createAuditLog({
-    //   documentId: null,
-    //   userId: user.id,
-    //   action: 'directory_created',
-    //   details: `Created directory: ${data.name}`,
-    // });
+    // Log the action
+    await logDocumentAction(
+      AuditActions.DIRECTORY_CREATED,
+      user.id,
+      undefined,
+      { directoryName: data.name, directoryId: directory.id }
+    );
 
     revalidatePath('/dashboard/document-management');
     
     return { 
       success: true,
-      // directory,
+      directory,
     };
   } catch (error) {
     console.error('Create directory error:', error);
@@ -64,7 +65,9 @@ export async function createDirectory(data: {
  */
 export async function renameDirectory(directoryId: string, newName: string) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -78,28 +81,30 @@ export async function renameDirectory(directoryId: string, newName: string) {
       return { error: 'Directory name too long' };
     }
 
-    // TODO: Check if directory exists and permissions
-    // const directory = await getDirectoryById(directoryId);
-    // if (!directory) {
-    //   return { error: 'Directory not found' };
-    // }
+    // Check if directory exists
+    const directory = await getDirectoryById(directoryId);
+    if (!directory) {
+      return { error: 'Directory not found' };
+    }
 
-    // const updatedDirectory = await dbUpdateDirectory(directoryId, {
-    //   name: newName.trim(),
-    // });
+    // Update directory in database
+    const updatedDirectory = await dbUpdateDirectory(directoryId, {
+      name: newName.trim(),
+    });
 
-    // await createAuditLog({
-    //   documentId: null,
-    //   userId: user.id,
-    //   action: 'directory_renamed',
-    //   details: `Renamed directory to: ${newName}`,
-    // });
+    // Log the action
+    await logDocumentAction(
+      'directory_renamed',
+      user.id,
+      undefined,
+      { directoryId, oldName: directory.name, newName: newName.trim() }
+    );
 
     revalidatePath('/dashboard/document-management');
     
     return { 
       success: true,
-      // directory: updatedDirectory,
+      directory: updatedDirectory,
     };
   } catch (error) {
     console.error('Rename directory error:', error);
@@ -112,33 +117,29 @@ export async function renameDirectory(directoryId: string, newName: string) {
  */
 export async function deleteDirectory(directoryId: string, force: boolean = false) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
 
-    // TODO: Check if directory exists and is empty (unless force=true)
-    // const directory = await getDirectoryById(directoryId);
-    // if (!directory) {
-    //   return { error: 'Directory not found' };
-    // }
+    // Check if directory exists
+    const directory = await getDirectoryById(directoryId);
+    if (!directory) {
+      return { error: 'Directory not found' };
+    }
 
-    // Check if directory has children
-    // if (!force) {
-    //   const children = await listDirectories(directoryId);
-    //   if (children.length > 0) {
-    //     return { error: 'Directory is not empty' };
-    //   }
-    // }
+    // Delete directory (cascade delete handled by database schema)
+    await dbDeleteDirectory(directoryId);
 
-    // await dbDeleteDirectory(directoryId, force);
-
-    // await createAuditLog({
-    //   documentId: null,
-    //   userId: user.id,
-    //   action: 'directory_deleted',
-    //   details: `Deleted directory: ${directory.name}`,
-    // });
+    // Log the action
+    await logDocumentAction(
+      AuditActions.DIRECTORY_DELETED,
+      user.id,
+      undefined,
+      { directoryId, directoryName: directory.name }
+    );
 
     revalidatePath('/dashboard/document-management');
     
@@ -154,7 +155,9 @@ export async function deleteDirectory(directoryId: string, force: boolean = fals
  */
 export async function getDirectoryTree(parentId?: string | null) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }
@@ -177,7 +180,9 @@ export async function getDirectoryTree(parentId?: string | null) {
  */
 export async function moveDirectory(directoryId: string, newParentId: string | null) {
   try {
-    const user = await getUser();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
     if (!user) {
       return { error: 'Unauthorized' };
     }

@@ -80,9 +80,9 @@ export const DocumentListItem: React.FC<DocumentListItemProps> = ({
 
   return (
     <div
-      role="button"
-      tabIndex={0}
-      aria-label={`Document: ${document.title}`}
+      role="listitem"
+      aria-label={`Document: ${document.title}${reviewIsOverdue ? ', review overdue' : ''}`}
+      aria-selected={isSelected}
       className={cn(
         'group flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer',
         'hover:bg-accent hover:border-accent-foreground/20',
@@ -94,6 +94,7 @@ export const DocumentListItem: React.FC<DocumentListItemProps> = ({
       )}
       onClick={onClick}
       onKeyDown={handleKeyDown}
+      tabIndex={0}
     >
       {/* Icon */}
       <div
@@ -101,6 +102,7 @@ export const DocumentListItem: React.FC<DocumentListItemProps> = ({
           'flex-shrink-0 p-2 rounded-md',
           isSelected ? 'bg-primary/10' : 'bg-muted'
         )}
+        aria-hidden="true"
       >
         <FileText
           className={cn(
@@ -142,7 +144,7 @@ export const DocumentListItem: React.FC<DocumentListItemProps> = ({
         <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
           {/* Last modified */}
           <div className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
+            <Clock className="h-3 w-3" aria-hidden="true" />
             <span>
               Modified {new Date(document.updatedAt).toLocaleDateString()}
             </span>
@@ -156,7 +158,7 @@ export const DocumentListItem: React.FC<DocumentListItemProps> = ({
                 reviewIsOverdue && 'text-destructive font-medium'
               )}
             >
-              {reviewIsOverdue && <AlertCircle className="h-3 w-3" />}
+              {reviewIsOverdue && <AlertCircle className="h-3 w-3" aria-label="Overdue" />}
               <span>Review: {formatDate(document.nextReviewDate)}</span>
             </div>
           )}
