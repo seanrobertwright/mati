@@ -5,7 +5,10 @@ A modular, enterprise-grade safety management system built with Next.js, TypeScr
 ## Features
 
 - **Modular Architecture**: Plugin-based safety modules using the Safety Framework
+- **Authentication & Authorization**: Supabase-based auth with 4-tier role system (viewer, employee, manager, admin)
+- **User Management**: Admin dashboard for managing users and roles
 - **Incident Reporting**: Track and manage safety incidents with persistent database storage
+- **Document Management**: Secure document storage with role-based access
 - **Modern UI**: Built with Tailwind CSS and shadcn/ui components
 - **Type-Safe**: Full TypeScript coverage with Drizzle ORM for database operations
 
@@ -14,6 +17,17 @@ A modular, enterprise-grade safety management system built with Next.js, TypeScr
 - Node.js 18+ and npm
 - A Supabase account and project ([supabase.com](https://supabase.com))
 - PostgreSQL database access (provided by Supabase)
+- Local Supabase CLI (optional, for local development)
+
+## Quick Start
+
+1. **Install dependencies**: `npm install`
+2. **Set up environment variables**: Copy `.env.local.example` to `.env.local` and configure
+3. **Run database migrations**: `npx drizzle-kit push`
+4. **Start local Supabase** (optional): `supabase start`
+5. **Create initial admin**: `npm run setup:admin` (see Authentication Setup below)
+6. **Run dev server**: `npm run dev`
+7. **Login**: Navigate to [http://localhost:3000/login](http://localhost:3000/login)
 
 ## Database Setup
 
@@ -55,6 +69,94 @@ This will create the `incidents` table and all necessary schema.
 ### 4. (Optional) Seed Demo Data
 
 To add sample incidents to your database, you can use the Supabase SQL editor or create a seed script.
+
+## Authentication Setup
+
+This application uses Supabase Auth with a role-based authorization system.
+
+### Environment Variables
+
+Add these to your `.env.local` file:
+
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL="your-supabase-project-url"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your-supabase-anon-key"
+SUPABASE_SERVICE_ROLE_KEY="your-supabase-service-role-key"  # For admin operations
+
+# Database
+DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
+```
+
+**Important:** The `SUPABASE_SERVICE_ROLE_KEY` should NEVER be exposed to the client. It's used only for server-side admin operations.
+
+### Create Initial Admin User
+
+After setting up Supabase, you need to create your first admin user:
+
+#### Option 1: Using the Admin Script
+
+1. Create a user account through the signup page at `/signup`
+2. Run the admin setup script:
+   ```bash
+   npm run setup:admin
+   ```
+   Or directly with ts-node:
+   ```bash
+   npx ts-node scripts/set-admin-role.ts
+   ```
+3. Enter your email when prompted
+4. The script will assign the admin role to your account
+5. Logout and login again to refresh your session
+
+#### Option 2: Using Supabase Dashboard
+
+1. Go to your Supabase project dashboard
+2. Navigate to **Authentication** > **Users**
+3. Find your user and click to edit
+4. In the **User Metadata** section, add:
+   ```json
+   {
+     "role": "admin"
+   }
+   ```
+5. Save and logout/login to refresh your token
+
+### Role System
+
+The application uses a 4-tier role hierarchy:
+
+| Role | Level | Description | Permissions |
+|------|-------|-------------|-------------|
+| **Viewer** | 0 | Read-only access | View data only, cannot create/edit |
+| **Employee** | 1 | Standard user | Create and view own incidents/documents |
+| **Manager** | 2 | Elevated permissions | View all data, manage incidents |
+| **Admin** | 3 | Full system access | User management, all features |
+
+**Default Role:** New signups are assigned the `employee` role by default.
+
+### Managing Users
+
+Admins can manage users through the admin dashboard:
+
+1. Login with an admin account
+2. Navigate to **Dashboard** > **Admin** > **User Management**
+3. View all users, change roles, or delete users
+4. **Note:** You cannot modify your own admin account (self-protection)
+
+### Authentication Features
+
+- ✅ Email/password authentication
+- ✅ Secure session management
+- ✅ Global logout (all devices)
+- ✅ Role-based route protection
+- ✅ Server-side permission checks
+- ✅ Read-only mode for viewers
+- ✅ Self-protection for admin accounts
+
+### Testing Authentication
+
+See `AUTHENTICATION_TESTING_FINAL_REPORT.md` for comprehensive testing documentation.
 
 ## Getting Started
 
