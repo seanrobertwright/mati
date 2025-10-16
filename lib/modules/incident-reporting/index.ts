@@ -42,7 +42,7 @@ const incidentReportingModule: SafetyModule = {
   ],
 
   // Optional: Minimum role required to access this module
-  minRole: 'employee', // Only employees and above can create/view incidents
+  minRole: 'viewer', // Viewers can view incidents (read-only), employees+ can create/edit
 
   // Optional: Lifecycle hooks
   lifecycle: {

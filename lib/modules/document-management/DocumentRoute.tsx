@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { FileText, FolderOpen, Plus } from 'lucide-react';
+import { FileText, FolderOpen, Plus, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import type { ModuleRouteProps } from '@/lib/safety-framework';
 import {
   DirectoryTree,
@@ -12,9 +13,11 @@ import {
   CreateDirectoryDialog,
   DocumentUploadForm,
 } from './components';
-import { createDirectory, getAllDirectories } from './actions/directories';
+import { createDirectory, getAllDirectories, getDocuments, moveDocument } from './actions';
 import type { Directory } from '@/lib/db/repositories/directories';
 import type { Document } from '@/lib/db/repositories/documents';
+import { createClient } from '@/lib/auth/client';
+import { getUserRole, hasRole } from '@/lib/auth/permissions';
 
 /**
  * DocumentRoute
@@ -30,9 +33,26 @@ const DocumentRoute: React.FC<ModuleRouteProps> = ({ params }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [expandedDirectoryIds, setExpandedDirectoryIds] = useState<Set<string>>(new Set());
+  const [canEdit, setCanEdit] = useState(false);
+  const [isViewer, setIsViewer] = useState(false);
 
   // Handle subpage routing
   const subpage = resolvedParams.subpage?.[0];
+
+  // Check user permissions
+  useEffect(() => {
+    const checkPermissions = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const role = getUserRole(user);
+        setCanEdit(hasRole(user, 'employee'));
+        setIsViewer(role === 'viewer');
+      }
+    };
+    checkPermissions();
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -51,12 +71,17 @@ const DocumentRoute: React.FC<ModuleRouteProps> = ({ params }) => {
           setDirectories([]);
         }
         
-        // TODO: Fetch documents for current directory
-        // const docResult = await getDocuments(currentDirectoryId);
-        // if (docResult.success) {
-        //   setDocuments(docResult.documents);
-        // }
-        setDocuments([]);
+        // Fetch documents for current directory
+        const docResult = await getDocuments(currentDirectoryId);
+        console.log('Document result:', docResult);
+        
+        if (docResult.success && docResult.documents) {
+          setDocuments(docResult.documents);
+          console.log('Loaded documents:', docResult.documents.length);
+        } else {
+          console.error('Failed to load documents:', docResult.error || 'Unknown error');
+          setDocuments([]);
+        }
       } catch (error) {
         console.error('Failed to load data:', error);
         setDirectories([]);
@@ -84,6 +109,21 @@ const DocumentRoute: React.FC<ModuleRouteProps> = ({ params }) => {
     }
   };
 
+  const loadDocuments = async () => {
+    try {
+      const docResult = await getDocuments(currentDirectoryId);
+      if (docResult.success && docResult.documents) {
+        setDocuments(docResult.documents);
+      } else {
+        console.error('Failed to load documents:', docResult.error);
+        setDocuments([]);
+      }
+    } catch (error) {
+      console.error('Failed to load documents:', error);
+      setDocuments([]);
+    }
+  };
+
   const handleCreateDirectory = async (name: string, parentId: string | null) => {
     try {
       const result = await createDirectory({
@@ -108,6 +148,55 @@ const DocumentRoute: React.FC<ModuleRouteProps> = ({ params }) => {
     }
   };
 
+  const handleDocumentDrop = async (documentId: string, targetDirectoryId: string | null) => {
+    try {
+      console.log(`Moving document ${documentId} to directory ${targetDirectoryId}`);
+      
+      const result = await moveDocument(documentId, targetDirectoryId);
+
+      if (result.success) {
+        console.log('Document moved successfully');
+        // Reload documents to reflect the change
+        await loadDocuments();
+      } else {
+        console.error('Failed to move document:', result.error);
+        alert(result.error || 'Failed to move document');
+      }
+    } catch (error) {
+      console.error('Error moving document:', error);
+      alert('An error occurred while moving the document');
+    }
+  };
+
+  const handleToggleExpand = (directoryId: string) => {
+    setExpandedDirectoryIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(directoryId)) {
+        next.delete(directoryId);
+      } else {
+        next.add(directoryId);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectDirectory = (directoryId: string | null) => {
+    setCurrentDirectoryId(directoryId);
+    
+    // Auto-expand the selected directory if it has children
+    if (directoryId) {
+      const hasChildren = directories.some(d => d.parentId === directoryId);
+      
+      if (hasChildren) {
+        setExpandedDirectoryIds((prev) => {
+          const next = new Set(prev);
+          next.add(directoryId);
+          return next;
+        });
+      }
+    }
+  };
+
   const handleSelectDocument = (document: Document) => {
     // TODO: Navigate to document detail view
     console.log('Selected document:', document.id);
@@ -117,10 +206,7 @@ const DocumentRoute: React.FC<ModuleRouteProps> = ({ params }) => {
     console.log('Upload complete:', documentId);
     setShowUploadDialog(false);
     // Reload data
-    setIsLoading(true);
-    await loadDirectories();
-    // TODO: Reload documents
-    setIsLoading(false);
+    await loadDocuments();
   };
 
   // Route to different views based on subpage
@@ -174,25 +260,37 @@ const DocumentRoute: React.FC<ModuleRouteProps> = ({ params }) => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Documents</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold">Documents</h1>
+          {isViewer && (
+            <Badge variant="secondary" className="gap-1">
+              <Eye className="h-3 w-3" />
+              Read-Only Access
+            </Badge>
+          )}
+        </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowCreateDialog(true)}
-            className="gap-2"
-          >
-            <FolderOpen className="h-4 w-4" />
-            New Folder
-          </Button>
-          <Button 
-            size="sm" 
-            className="gap-2"
-            onClick={() => setShowUploadDialog(true)}
-          >
-            <Plus className="h-4 w-4" />
-            Upload Document
-          </Button>
+          {canEdit && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCreateDialog(true)}
+                className="gap-2"
+              >
+                <FolderOpen className="h-4 w-4" />
+                New Folder
+              </Button>
+              <Button 
+                size="sm" 
+                className="gap-2"
+                onClick={() => setShowUploadDialog(true)}
+              >
+                <Plus className="h-4 w-4" />
+                Upload Document
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -218,7 +316,10 @@ const DocumentRoute: React.FC<ModuleRouteProps> = ({ params }) => {
             <DirectoryTree
               directories={directories}
               selectedDirectoryId={currentDirectoryId}
-              onSelectDirectory={setCurrentDirectoryId}
+              onSelectDirectory={handleSelectDirectory}
+              onDocumentDrop={handleDocumentDrop}
+              expandedIds={expandedDirectoryIds}
+              onToggleExpand={handleToggleExpand}
             />
           )}
         </Card>

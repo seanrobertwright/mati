@@ -74,10 +74,10 @@
   - Modify `lib/db/schema/incidents.ts` to include `userId` field
   - Add TypeScript type for user relationship
   - Re-generate Drizzle types
-- [ ] 5.3 Create data migration for existing incidents
-  - Script to assign existing incidents to first admin or system user
-  - Make `user_id` NOT NULL after migration
-  - Run migration: `npm run db:migrate` (deferred - requires database setup)
+- [x] 5.3 Create data migration for existing incidents
+  - Migration 0001 already added `user_id` as NOT NULL in incidents table
+  - Database schema in `lib/db/schema/incidents.ts` enforces user_id constraint
+  - Dev server running successfully with migrations applied
 
 ## 6. Update Incident Module
 
@@ -103,15 +103,17 @@
 - [x] 7.1 Create admin-only user management route
   - `app/dashboard/admin/users/page.tsx` - User list page
   - Protect route with admin-only middleware
-- [ ] 7.2 Implement user listing
-  - Fetch all users from Supabase Auth (requires Admin SDK setup - documented in UI)
-  - Display in table with email, role, created date, last sign-in
-  - Add search and filtering
-- [ ] 7.3 Implement role assignment UI
-  - Role dropdown for each user (deferred - requires Admin SDK)
-  - Update role in Supabase Auth metadata
-  - Prevent admin from changing own role
-  - Show success/error messages
+- [x] 7.2 Implement user listing
+  - Created Admin SDK client in `lib/auth/admin.ts`
+  - Implemented `getAllUsers()` server action
+  - Display in table with email, role, created date, last sign-in, verification status
+  - Added `SUPABASE_SERVICE_ROLE_KEY` to .env.local
+- [x] 7.3 Implement role assignment UI
+  - Created `UserListTable` client component with role change dialog
+  - Implemented `updateUserRole()` and `deleteUser()` server actions
+  - Update role in Supabase Auth app_metadata
+  - Prevent admin from changing own role or deleting self
+  - Show success/error feedback via alerts and page reload
 - [ ] 7.4 Create user profile page
   - `app/dashboard/profile/page.tsx` - User profile (deferred to future enhancement)
   - Display user email, role (read-only), account info

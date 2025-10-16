@@ -7,10 +7,10 @@ import {
   updateDocument as dbUpdateDocument,
   deleteDocument as dbDeleteDocument,
   getDocumentById,
-  listDocuments,
+  getDocumentsByDirectory,
+  type Document,
 } from '@/lib/db/repositories/documents';
-import { canEditDocument, canDeleteDocument, canViewDocument } from '@/lib/auth/permissions';
-import { createAuditLog } from '@/lib/db/repositories/audit-log';
+import { canEditDocument, getUserRole, hasRole } from '@/lib/auth/permissions';
 
 /**
  * Server action to create a new document
@@ -31,6 +31,11 @@ export async function createDocument(data: {
       return { error: 'Unauthorized' };
     }
 
+    // Viewers cannot create documents
+    if (!hasRole(user, 'employee')) {
+      return { error: 'Forbidden: Viewers have read-only access' };
+    }
+
     // TODO: Implement actual database operation
     // const document = await dbCreateDocument({
     //   ...data,
@@ -38,7 +43,7 @@ export async function createDocument(data: {
     //   status: 'draft',
     // });
 
-    // await createAuditLog({
+    // await getAuditLog({
     //   documentId: document.id,
     //   userId: user.id,
     //   action: 'document_created',
@@ -78,6 +83,11 @@ export async function updateDocument(
       return { error: 'Unauthorized' };
     }
 
+    // Viewers cannot update documents
+    if (!hasRole(user, 'employee')) {
+      return { error: 'Forbidden: Viewers have read-only access' };
+    }
+
     // TODO: Check permissions
     // const document = await getDocumentById(documentId);
     // if (!document) {
@@ -91,7 +101,7 @@ export async function updateDocument(
 
     // const updatedDocument = await dbUpdateDocument(documentId, data);
 
-    // await createAuditLog({
+    // await getAuditLog({
     //   documentId,
     //   userId: user.id,
     //   action: 'document_updated',
@@ -123,6 +133,11 @@ export async function deleteDocument(documentId: string) {
       return { error: 'Unauthorized' };
     }
 
+    // Viewers cannot delete documents
+    if (!hasRole(user, 'employee')) {
+      return { error: 'Forbidden: Viewers have read-only access' };
+    }
+
     // TODO: Check permissions
     // const document = await getDocumentById(documentId);
     // if (!document) {
@@ -136,7 +151,7 @@ export async function deleteDocument(documentId: string) {
 
     // await dbDeleteDocument(documentId);
 
-    // await createAuditLog({
+    // await getAuditLog({
     //   documentId,
     //   userId: user.id,
     //   action: 'document_deleted',
@@ -194,22 +209,89 @@ export async function getDocuments(directoryId?: string | null) {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      return { error: 'Unauthorized' };
+      return { success: false, error: 'Unauthorized', documents: [] };
     }
 
-    // TODO: Implement actual database query
-    // const documents = await listDocuments({
-    //   directoryId: directoryId || null,
-    //   userId: user.id,
-    // });
+    // Get documents from the specified directory (or root if null/undefined)
+    const documents = await getDocumentsByDirectory(
+      directoryId === undefined ? null : directoryId,
+      {
+        orderBy: 'updatedAt',
+        order: 'desc',
+      }
+    );
+
+    console.log(`Retrieved ${documents.length} documents for directory:`, directoryId);
 
     return { 
       success: true,
-      documents: [],
+      documents: documents as Document[],
     };
   } catch (error) {
     console.error('List documents error:', error);
-    return { error: 'Failed to list documents' };
+    return { 
+      success: false,
+      error: 'Failed to list documents',
+      documents: []
+    };
+  }
+}
+
+/**
+ * Server action to move a document to a different directory
+ */
+export async function moveDocument(
+  documentId: string,
+  targetDirectoryId: string | null
+) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    // Get the document and check permissions
+    const document = await getDocumentById(documentId);
+    if (!document) {
+      return { success: false, error: 'Document not found' };
+    }
+
+    // Check if user has permission to edit this document
+    // For now, simple check: user must be owner or admin
+    const hasPermission = canEditDocument(user, null, document.ownerId);
+    if (!hasPermission) {
+      return { success: false, error: 'Forbidden: You do not have permission to move this document' };
+    }
+
+    // Update the document's directory
+    const updatedDocument = await dbUpdateDocument(documentId, {
+      directoryId: targetDirectoryId,
+    });
+
+    // Log the move in audit trail
+    const { logDocumentAction } = await import('@/lib/db/repositories/audit-log');
+    await logDocumentAction(
+      'document_moved',
+      user.id,
+      documentId,
+      `Moved document to ${targetDirectoryId ? 'directory ' + targetDirectoryId : 'root'}`
+    );
+
+    // Revalidate both old and new directory views
+    revalidatePath('/dashboard/document-management');
+    
+    return { 
+      success: true,
+      document: updatedDocument,
+    };
+  } catch (error) {
+    console.error('Move document error:', error);
+    return { 
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to move document'
+    };
   }
 }
 

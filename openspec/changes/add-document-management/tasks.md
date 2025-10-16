@@ -62,7 +62,7 @@
 - [x] 6.5 Create `CreateDirectoryDialog` component
 - [x] 6.6 Create `RenameDirectoryDialog` component
 - [x] 6.7 Create `DeleteDirectoryDialog` with safety checks
-- [ ] 6.8 Add drag-and-drop support for file upload
+- [x] 6.8 Add drag-and-drop support for file upload and document moving
 - [x] 6.9 Add keyboard navigation support
 
 ## 7. UI Components - Document Management

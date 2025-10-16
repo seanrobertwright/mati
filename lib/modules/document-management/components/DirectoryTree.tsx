@@ -4,11 +4,13 @@ import { useState, useCallback } from 'react';
 import { ChevronRight, ChevronDown, Folder, FolderOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Directory } from '@/lib/db/repositories/directories';
+import { useDropzone } from '../hooks/useDragAndDrop';
 
 interface DirectoryTreeProps {
   directories: Directory[];
   selectedDirectoryId?: string | null;
   onSelectDirectory: (directoryId: string | null) => void;
+  onDocumentDrop?: (documentId: string, targetDirectoryId: string | null) => void;
   expandedIds?: Set<string>;
   onToggleExpand?: (directoryId: string) => void;
   className?: string;
@@ -64,7 +66,8 @@ interface DirectoryTreeNodeProps {
   node: DirectoryNode;
   selectedDirectoryId?: string | null;
   onSelectDirectory: (directoryId: string | null) => void;
-  isExpanded: boolean;
+  onDocumentDrop?: (documentId: string, targetDirectoryId: string | null) => void;
+  expandedIds: Set<string>;
   onToggleExpand: (directoryId: string) => void;
 }
 
@@ -72,15 +75,32 @@ const DirectoryTreeNode: React.FC<DirectoryTreeNodeProps> = ({
   node,
   selectedDirectoryId,
   onSelectDirectory,
-  isExpanded,
+  onDocumentDrop,
+  expandedIds,
   onToggleExpand,
 }) => {
   const hasChildren = node.children.length > 0;
   const isSelected = selectedDirectoryId === node.id;
+  const isExpanded = expandedIds.has(node.id);
 
   const handleClick = useCallback(() => {
     onSelectDirectory(node.id);
   }, [node.id, onSelectDirectory]);
+
+  // Drop zone for dragged documents
+  const { isDraggedOver, dropzoneProps } = useDropzone({
+    onDrop: (data) => {
+      if (typeof data === 'object' && 'documentId' in data && data.type === 'document') {
+        const documentId = data.documentId as string;
+        const currentDirId = data.currentDirectoryId as string | null;
+        
+        // Only trigger move if dropping into a different directory
+        if (currentDirId !== node.id) {
+          onDocumentDrop?.(documentId, node.id);
+        }
+      }
+    },
+  });
 
   const handleToggle = useCallback(
     (e: React.MouseEvent) => {
@@ -111,6 +131,7 @@ const DirectoryTreeNode: React.FC<DirectoryTreeNodeProps> = ({
   return (
     <div className="select-none">
       <div
+        {...dropzoneProps}
         role="button"
         tabIndex={0}
         aria-label={`Directory: ${node.name}`}
@@ -119,7 +140,8 @@ const DirectoryTreeNode: React.FC<DirectoryTreeNodeProps> = ({
           'flex items-center gap-1 px-2 py-1.5 rounded-md cursor-pointer transition-colors',
           'hover:bg-accent hover:text-accent-foreground',
           'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-          isSelected && 'bg-accent text-accent-foreground font-medium'
+          isSelected && 'bg-accent text-accent-foreground font-medium',
+          isDraggedOver && 'ring-2 ring-primary bg-primary/10'
         )}
         style={{ paddingLeft: `${node.level * 16 + 8}px` }}
         onClick={handleClick}
@@ -159,7 +181,8 @@ const DirectoryTreeNode: React.FC<DirectoryTreeNodeProps> = ({
               node={child}
               selectedDirectoryId={selectedDirectoryId}
               onSelectDirectory={onSelectDirectory}
-              isExpanded={isExpanded}
+              onDocumentDrop={onDocumentDrop}
+              expandedIds={expandedIds}
               onToggleExpand={onToggleExpand}
             />
           ))}
@@ -173,6 +196,7 @@ export const DirectoryTree: React.FC<DirectoryTreeProps> = ({
   directories,
   selectedDirectoryId,
   onSelectDirectory,
+  onDocumentDrop,
   expandedIds: externalExpandedIds,
   onToggleExpand: externalOnToggleExpand,
   className,
@@ -254,7 +278,8 @@ export const DirectoryTree: React.FC<DirectoryTreeProps> = ({
           node={node}
           selectedDirectoryId={selectedDirectoryId}
           onSelectDirectory={onSelectDirectory}
-          isExpanded={expandedIds.has(node.id)}
+          onDocumentDrop={onDocumentDrop}
+          expandedIds={expandedIds}
           onToggleExpand={handleToggleExpand}
         />
       ))}

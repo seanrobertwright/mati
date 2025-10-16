@@ -62,7 +62,7 @@ const documentManagementModule: SafetyModule = {
   ],
 
   // Optional: Minimum role required to access this module
-  minRole: 'employee', // All employees can view documents
+  minRole: 'viewer', // Viewers can view documents (read-only), employees+ can upload/edit
 
   // Optional: Lifecycle hooks
   lifecycle: {
@@ -80,14 +80,14 @@ const documentManagementModule: SafetyModule = {
 
 export default documentManagementModule;
 
-// Export validation utilities
-export * from './validation';
+// Export validation utilities (namespace to avoid name collisions)
+export * as Validation from './validation';
 
-// Export error handling utilities
-export * from './errors';
+// Export error handling utilities (namespace to avoid name collisions)
+export * as Errors from './errors';
 
-// Export components
-export * from './components';
+// Export components (namespace to avoid name collisions)
+export * as Components from './components';
 
 // Export actions (server actions for client components)
 export * as DocumentActions from './actions';

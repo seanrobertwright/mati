@@ -11,6 +11,7 @@ export {
   deleteDocument,
   getDocument,
   getDocuments,
+  moveDocument,
 } from './documents';
 
 // Directory operations

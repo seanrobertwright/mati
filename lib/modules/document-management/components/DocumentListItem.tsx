@@ -1,9 +1,10 @@
 'use client';
 
-import { FileText, Clock, AlertCircle } from 'lucide-react';
+import { FileText, Clock, AlertCircle, GripVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import type { Document } from '@/lib/db/repositories/documents';
+import { useDraggable } from '../hooks/useDragAndDrop';
 
 interface DocumentListItemProps {
   document: Document;
@@ -13,6 +14,7 @@ interface DocumentListItemProps {
   showOwner?: boolean;
   showStatus?: boolean;
   showReviewDate?: boolean;
+  enableDragDrop?: boolean;
   className?: string;
 }
 
@@ -67,6 +69,7 @@ export const DocumentListItem: React.FC<DocumentListItemProps> = ({
   showOwner = true,
   showStatus = true,
   showReviewDate = true,
+  enableDragDrop = true,
   className,
 }) => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -78,11 +81,21 @@ export const DocumentListItem: React.FC<DocumentListItemProps> = ({
 
   const reviewIsOverdue = isOverdue(document.nextReviewDate);
 
+  // Drag and drop support
+  const { isDragging, dragProps } = useDraggable({
+    dragData: {
+      type: 'document',
+      documentId: document.id,
+      title: document.title,
+      currentDirectoryId: document.directoryId,
+    },
+  });
+
   return (
     <div
-      role="listitem"
-      aria-label={`Document: ${document.title}${reviewIsOverdue ? ', review overdue' : ''}`}
-      aria-selected={isSelected}
+      {...(enableDragDrop ? dragProps : {})}
+      role="button"
+      aria-label={`Document: ${document.title}${reviewIsOverdue ? ', review overdue' : ''}${isSelected ? ', selected' : ''}`}
       className={cn(
         'group flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer',
         'hover:bg-accent hover:border-accent-foreground/20',
@@ -90,12 +103,26 @@ export const DocumentListItem: React.FC<DocumentListItemProps> = ({
         isSelected
           ? 'bg-accent border-accent-foreground/30 shadow-sm'
           : 'bg-card border-border',
+        isDragging && 'opacity-50 border-primary',
         className
       )}
       onClick={onClick}
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >
+      {/* Drag Handle */}
+      {enableDragDrop && (
+        <div
+          className={cn(
+            'flex-shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing',
+            isDragging && 'opacity-100'
+          )}
+          aria-label="Drag to move document"
+        >
+          <GripVertical className="h-4 w-4" />
+        </div>
+      )}
+      
       {/* Icon */}
       <div
         className={cn(

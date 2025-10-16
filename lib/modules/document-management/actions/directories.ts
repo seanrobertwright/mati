@@ -2,16 +2,18 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/auth/server';
+import { db } from '@/lib/db/client';
+import { directories } from '@/lib/db/schema';
 import {
   createDirectory as dbCreateDirectory,
   updateDirectory as dbUpdateDirectory,
   deleteDirectory as dbDeleteDirectory,
   getDirectoryById,
   getDirectoryTree as dbGetDirectoryTree,
-  getRootDirectories,
-  getSubdirectories,
+  type Directory,
 } from '@/lib/db/repositories/directories';
 import { logDocumentAction, AuditActions } from '@/lib/db/repositories/audit-log';
+import { hasRole } from '@/lib/auth/permissions';
 
 /**
  * Server action to create a new directory
@@ -26,6 +28,11 @@ export async function createDirectory(data: {
     
     if (!user) {
       return { error: 'Unauthorized' };
+    }
+
+    // Viewers cannot create directories
+    if (!hasRole(user, 'employee')) {
+      return { error: 'Forbidden: Viewers have read-only access' };
     }
 
     // Validate directory name
@@ -94,6 +101,11 @@ export async function renameDirectory(directoryId: string, newName: string) {
       return { error: 'Unauthorized' };
     }
 
+    // Viewers cannot rename directories
+    if (!hasRole(user, 'employee')) {
+      return { error: 'Forbidden: Viewers have read-only access' };
+    }
+
     // Validate new name
     if (!newName || newName.trim().length === 0) {
       return { error: 'Directory name is required' };
@@ -137,13 +149,18 @@ export async function renameDirectory(directoryId: string, newName: string) {
 /**
  * Server action to delete a directory
  */
-export async function deleteDirectory(directoryId: string, force: boolean = false) {
+export async function deleteDirectory(directoryId: string, _force: boolean = false) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
       return { error: 'Unauthorized' };
+    }
+
+    // Viewers cannot delete directories
+    if (!hasRole(user, 'employee')) {
+      return { error: 'Forbidden: Viewers have read-only access' };
     }
 
     // Check if directory exists
@@ -175,7 +192,7 @@ export async function deleteDirectory(directoryId: string, force: boolean = fals
 /**
  * Server action to get directory tree
  */
-export async function getDirectoryTree(parentId?: string | null) {
+export async function getDirectoryTree(_parentId?: string | null) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -220,14 +237,18 @@ export async function getAllDirectories() {
       };
     }
 
-    // Get all directories via tree structure
+    // Get all directories as a flat list
     try {
-      const tree = await dbGetDirectoryTree();
-      console.log('Retrieved directory tree:', tree);
+      const allDirectories = await db
+        .select()
+        .from(directories)
+        .orderBy(directories.name);
+      
+      console.log('Retrieved directories:', allDirectories.length);
 
       return { 
         success: true,
-        directories: tree || [],
+        directories: allDirectories as Directory[],
       };
     } catch (dbError) {
       console.error('Database error in getDirectoryTree:', dbError);
@@ -250,7 +271,7 @@ export async function getAllDirectories() {
 /**
  * Server action to move a directory to a new parent
  */
-export async function moveDirectory(directoryId: string, newParentId: string | null) {
+export async function moveDirectory(_directoryId: string, _newParentId: string | null) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

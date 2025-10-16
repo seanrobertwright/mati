@@ -2,15 +2,9 @@ import { createClient } from '@/lib/auth/server';
 import { redirect } from 'next/navigation';
 import { isAdmin, getAllRoles, getRoleDisplayName, getRoleDescription } from '@/lib/auth/permissions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { getAllUsers } from './actions';
+import { UserListTable } from './UserListTable';
 
 export const metadata = {
   title: 'User Management - Safety Management',
@@ -23,15 +17,24 @@ export default async function UserManagementPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Debug: Log user info
+  console.log('🔍 Admin page check:', {
+    hasUser: !!user,
+    userId: user?.id,
+    email: user?.email,
+    appMetadata: user?.app_metadata,
+    role: user?.app_metadata?.role,
+    isAdmin: user ? isAdmin(user) : false,
+  });
+
   // Redirect if not admin
   if (!user || !isAdmin(user)) {
+    console.log('❌ Access denied - redirecting to dashboard');
     redirect('/dashboard');
   }
 
-  // Fetch all users (Note: This requires admin API access in Supabase)
-  // For now, we'll show a placeholder. In production, you'd need to:
-  // 1. Set up a server action/API route that uses Supabase Admin SDK
-  // 2. Or enable the auth.users table RLS for admins
+  // Fetch all users
+  const { users, error } = await getAllUsers();
   
   return (
     <div className="space-y-6">
@@ -44,62 +47,52 @@ export default async function UserManagementPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Users</CardTitle>
+          <CardTitle>Users ({users.length})</CardTitle>
           <CardDescription>
             View and manage all registered users in the system
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border border-yellow-200 bg-yellow-50 p-4 mb-4">
-            <p className="text-sm text-yellow-800">
-              <strong>Setup Required:</strong> User list requires Supabase Admin SDK configuration.
-              For now, you can manage user roles directly in the Supabase Dashboard under Authentication → Users.
-            </p>
-            <p className="text-xs text-yellow-700 mt-2">
-              To enable full user management:
-              <br />1. Set up a server action with Supabase Admin SDK
-              <br />2. Or configure RLS policies to allow admins to query auth.users
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Available Roles</h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              {getAllRoles().map((role) => (
-                <Card key={role}>
-                  <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                      {getRoleDisplayName(role)}
-                      <Badge variant={role === 'admin' ? 'default' : 'secondary'}>
-                        {role}
-                      </Badge>
-                    </CardTitle>
-                    <CardDescription className="text-sm">
-                      {getRoleDescription(role)}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              ))}
+          {error ? (
+            <div className="rounded-md border border-red-200 bg-red-50 p-4 mb-4">
+              <p className="text-sm text-red-800">
+                <strong>Error:</strong> {error}
+              </p>
+              <p className="text-xs text-red-700 mt-2">
+                Make sure SUPABASE_SERVICE_ROLE_KEY is set in your .env.local file.
+                You can find this key in your Supabase project settings under API.
+              </p>
             </div>
-          </div>
+          ) : (
+            <UserListTable users={users} currentUserId={user.id} />
+          )}
+        </CardContent>
+      </Card>
 
-          <div className="mt-6 space-y-2">
-            <h3 className="text-lg font-medium">Quick Links</h3>
-            <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
-              <li>
-                Manage users in{' '}
-                <a
-                  href="https://app.supabase.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  Supabase Dashboard
-                </a>
-              </li>
-              <li>To assign roles: Go to Authentication → Users → Select user → User Metadata → Set `role` in app_metadata</li>
-              <li>First admin can be set via `INITIAL_ADMIN_EMAIL` environment variable</li>
-            </ul>
+      <Card>
+        <CardHeader>
+          <CardTitle>Role Definitions</CardTitle>
+          <CardDescription>
+            Available roles and their permissions
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            {getAllRoles().map((role) => (
+              <Card key={role}>
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    {getRoleDisplayName(role)}
+                    <Badge variant={role === 'admin' ? 'default' : 'secondary'}>
+                      {role}
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    {getRoleDescription(role)}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
           </div>
         </CardContent>
       </Card>

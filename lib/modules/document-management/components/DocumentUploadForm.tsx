@@ -134,9 +134,11 @@ export const DocumentUploadForm: React.FC<DocumentUploadFormProps> = ({
     e.stopPropagation();
     setDragActive(false);
 
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      handleFileSelect(file);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      // For now, handle only the first file
+      // TODO: Support multiple file uploads in future
+      handleFileSelect(files[0]);
     }
   };
 
