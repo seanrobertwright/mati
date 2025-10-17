@@ -1,4 +1,5 @@
 import { Home } from "lucide-react"
+import Link from "next/link"
 import type { User } from '@supabase/supabase-js';
 
 import { registry } from "@/lib/safety-framework"
@@ -26,6 +27,11 @@ export function AppSidebar({ user }: AppSidebarProps) {
       key: `${mod.id}-${idx}`,
       href: `/dashboard${navItem.href}`,
       label: navItem.label,
+      children: navItem.children?.map((child, childIdx) => ({
+        key: `${mod.id}-${idx}-${childIdx}`,
+        href: `/dashboard${child.href}`,
+        label: child.label,
+      })),
     })) || []
   )
 
@@ -34,7 +40,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <a href="/dashboard" className="flex items-center gap-2 px-2 py-1.5">
+            <Link href="/dashboard" className="flex items-center gap-2 px-2 py-1.5">
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                 <Home className="size-4" />
               </div>
@@ -42,7 +48,7 @@ export function AppSidebar({ user }: AppSidebarProps) {
                 <span className="truncate font-semibold">Safety Dashboard</span>
                 <span className="truncate text-xs">Management System</span>
               </div>
-            </a>
+            </Link>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

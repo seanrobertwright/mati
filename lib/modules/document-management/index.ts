@@ -1,7 +1,6 @@
 import type { SafetyModule } from '@/lib/safety-framework';
 import DocumentWidget from './DocumentWidget';
 import DocumentRoute from './DocumentRoute';
-import DocumentRouteFallback from './DocumentRouteFallback';
 import DocumentIcon from './DocumentIcon';
 
 /**
@@ -46,18 +45,20 @@ const documentManagementModule: SafetyModule = {
       label: 'Documents',
       href: '/document-management',
       icon: DocumentIcon,
-    },
-    {
-      label: 'Change Requests',
-      href: '/document-management/change-requests',
-    },
-    {
-      label: 'Metrics',
-      href: '/document-management/metrics',
-    },
-    {
-      label: 'Audit Log',
-      href: '/document-management/audit-log',
+      children: [
+        {
+          label: 'Change Requests',
+          href: '/document-management/change-requests',
+        },
+        {
+          label: 'Metrics',
+          href: '/document-management/metrics',
+        },
+        {
+          label: 'Audit Log',
+          href: '/document-management/audit-log',
+        },
+      ],
     },
   ],
 

@@ -34,6 +34,8 @@ export interface ModuleNavigation {
   href: string;
   /** Optional icon component */
   icon?: ComponentType;
+  /** Optional child navigation items (for collapsible sub-menus) */
+  children?: Omit<ModuleNavigation, 'children' | 'icon'>[];
 }
 
 /**
