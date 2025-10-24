@@ -3,8 +3,33 @@ import { changeRequests, changeRequestComments, changeRequestApprovals } from '.
 import { eq, and, desc, inArray } from 'drizzle-orm';
 import type { User } from '@supabase/supabase-js';
 
-export type ChangeRequest = typeof changeRequests.$inferSelect;
-export type NewChangeRequest = typeof changeRequests.$inferInsert;
+export type ChangeRequest = {
+  id: string;
+  documentTitle: string;
+  documentNumber: string;
+  revision: string;
+  requestDate: Date;
+  requestedBy: string;
+  department: string;
+  changeType: 'revision' | 'addition' | 'deletion' | 'clarification';
+  reason: string;
+  description: string;
+  priority: 'low' | 'medium' | 'high' | 'critical' | null;
+  impactAssessment: string;
+  affectedDocuments?: string | null;
+  proposedBy?: string | null;
+  reviewedBy?: string | null;
+  approvedBy?: string | null;
+  implementationDate?: Date | null;
+  trainingRequired?: string | null;
+  retrainingRequired?: string | null;
+  additionalNotes?: string | null;
+  status: 'draft' | 'submitted' | 'under_review' | 'approved' | 'rejected' | 'implemented';
+  implementedVersionId?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+export type NewChangeRequest = Omit<ChangeRequest, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'implementedVersionId'>;
 export type ChangeRequestComment = typeof changeRequestComments.$inferSelect;
 export type ChangeRequestApproval = typeof changeRequestApprovals.$inferSelect;
 
@@ -21,10 +46,16 @@ export async function createChangeRequest(
   user: User
 ): Promise<ChangeRequest> {
   try {
+    // Ensure requestDate is a Date object
+    let requestDate = data.requestDate;
+    if (typeof requestDate === 'string') {
+      requestDate = new Date(requestDate);
+    }
     const [changeRequest] = await db
       .insert(changeRequests)
       .values({
         ...data,
+        requestDate,
         requestedBy: user.id,
         status: 'draft',
       })
@@ -78,21 +109,6 @@ export async function getChangeRequestById(
   }
 }
 
-/**
- * Get all change requests for a document
- */
-export async function getChangeRequestsByDocument(documentId: string): Promise<ChangeRequest[]> {
-  try {
-    return await db
-      .select()
-      .from(changeRequests)
-      .where(eq(changeRequests.documentId, documentId))
-      .orderBy(desc(changeRequests.createdAt));
-  } catch (error) {
-    console.error('Error fetching change requests:', error);
-    throw new Error('Failed to fetch change requests');
-  }
-}
 
 /**
  * Get change requests by status
@@ -118,30 +134,26 @@ export async function getChangeRequestsByStatus(
 export async function getAllChangeRequests(options?: {
   status?: Array<ChangeRequest['status']>;
   priority?: Array<ChangeRequest['priority']>;
-  documentId?: string;
+  department?: string;
 }): Promise<ChangeRequest[]> {
   try {
-    let query = db.select().from(changeRequests);
-
     const conditions = [];
-
     if (options?.status && options.status.length > 0) {
       conditions.push(inArray(changeRequests.status, options.status));
     }
-
     if (options?.priority && options.priority.length > 0) {
-      conditions.push(inArray(changeRequests.priority, options.priority));
+      const filteredPriority = options.priority.filter((p): p is 'low' | 'medium' | 'high' | 'critical' => p !== null);
+      if (filteredPriority.length > 0) {
+        conditions.push(inArray(changeRequests.priority, filteredPriority));
+      }
     }
-
-    if (options?.documentId) {
-      conditions.push(eq(changeRequests.documentId, options.documentId));
+    if (options?.department) {
+      conditions.push(eq(changeRequests.department, options.department));
     }
-
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions)) as any;
-    }
-
-    return await (query as any).orderBy(desc(changeRequests.updatedAt));
+    const query = conditions.length > 0
+      ? db.select().from(changeRequests).where(and(...conditions)).orderBy(desc(changeRequests.updatedAt))
+      : db.select().from(changeRequests).orderBy(desc(changeRequests.updatedAt));
+    return await query;
   } catch (error) {
     console.error('Error fetching all change requests:', error);
     throw new Error('Failed to fetch change requests');

@@ -13,22 +13,58 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { CreateChangeRequestDialog } from './CreateChangeRequestDialog';
+import { useState, useEffect } from 'react';
+// Remove server actions, use API routes
 
 interface ChangeRequest {
   id: string;
-  title: string;
-  documentName: string;
-  requestedBy: string;
+  documentTitle: string;
+  documentNumber: string;
+  revision: string;
   requestDate: string;
-  status: 'pending' | 'in-review' | 'approved' | 'rejected';
+  requestedBy: string;
+  department: string;
+  changeType: string;
+  reason: string;
+  description: string;
   priority: 'high' | 'medium' | 'low';
+  impactAssessment: string;
+  status: 'pending' | 'in-review' | 'approved' | 'rejected';
 }
 
 interface ChangeRequestsClientProps {
-  changeRequests: ChangeRequest[];
+  changeRequests?: ChangeRequest[];
+}
+
+// Type for new requests (without id/status)
+interface NewChangeRequest {
+  documentTitle: string;
+  documentNumber: string;
+  revision: string;
+  requestDate: Date;
+  requestedBy: string;
+  department: string;
+  changeType: string;
+  reason: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low' | 'critical' | null;
+  impactAssessment: string;
 }
 
 export function ChangeRequestsClient({ changeRequests }: ChangeRequestsClientProps) {
+  const [requests, setRequests] = useState<ChangeRequest[]>(changeRequests ?? []);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch('/api/change-requests')
+      .then((res) => res.json())
+      .then((data) => {
+        setRequests(data);
+        setLoading(false);
+      });
+  }, []);
+
   const statusConfig = {
     pending: { icon: Clock, color: 'bg-yellow-100 text-yellow-800 border-yellow-200', label: 'Pending' },
     'in-review': { icon: AlertCircle, color: 'bg-blue-100 text-blue-800 border-blue-200', label: 'In Review' },
@@ -42,6 +78,24 @@ export function ChangeRequestsClient({ changeRequests }: ChangeRequestsClientPro
     low: 'bg-gray-100 text-gray-800 border-gray-200',
   };
 
+  // Handler to add a new request
+  async function handleCreate(newRequest: NewChangeRequest) {
+    setLoading(true);
+    try {
+      // Convert requestDate to string for API
+      const payload = { ...newRequest, requestDate: newRequest.requestDate.toISOString() };
+      await fetch('/api/change-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const updated = await fetch('/api/change-requests').then((res) => res.json());
+      setRequests(updated);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -52,7 +106,7 @@ export function ChangeRequestsClient({ changeRequests }: ChangeRequestsClientPro
             Manage document change requests and approval workflows
           </p>
         </div>
-        <CreateChangeRequestDialog />
+  <CreateChangeRequestDialog onCreate={handleCreate} />
       </div>
 
       {/* Summary Cards */}
@@ -63,7 +117,7 @@ export function ChangeRequestsClient({ changeRequests }: ChangeRequestsClientPro
             <FileEdit className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{changeRequests.length}</div>
+            <div className="text-2xl font-bold">{requests.length}</div>
             <p className="text-xs text-muted-foreground">All time</p>
           </CardContent>
         </Card>
@@ -75,7 +129,7 @@ export function ChangeRequestsClient({ changeRequests }: ChangeRequestsClientPro
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {changeRequests.filter((r) => r.status === 'pending').length}
+              {requests.filter((r) => r.status === 'pending').length}
             </div>
             <p className="text-xs text-muted-foreground">Awaiting review</p>
           </CardContent>
@@ -88,7 +142,7 @@ export function ChangeRequestsClient({ changeRequests }: ChangeRequestsClientPro
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {changeRequests.filter((r) => r.status === 'in-review').length}
+              {requests.filter((r) => r.status === 'in-review').length}
             </div>
             <p className="text-xs text-muted-foreground">Being evaluated</p>
           </CardContent>
@@ -101,7 +155,7 @@ export function ChangeRequestsClient({ changeRequests }: ChangeRequestsClientPro
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {changeRequests.filter((r) => r.status === 'approved').length}
+              {requests.filter((r) => r.status === 'approved').length}
             </div>
             <p className="text-xs text-muted-foreground">Ready to implement</p>
           </CardContent>
@@ -115,65 +169,78 @@ export function ChangeRequestsClient({ changeRequests }: ChangeRequestsClientPro
           <CardDescription>View and manage all document change requests</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Request Title</TableHead>
-                <TableHead>Document</TableHead>
-                <TableHead>Requested By</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {changeRequests.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-8 text-muted-foreground">Loading...</div>
+          ) : (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground">
-                    No change requests found
-                  </TableCell>
+                  <TableHead>Document Title</TableHead>
+                  <TableHead>Document Number</TableHead>
+                  <TableHead>Revision</TableHead>
+                  <TableHead>Request Date</TableHead>
+                  <TableHead>Requested By</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Change Type</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Priority</TableHead>
+                  <TableHead>Impact Assessment</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ) : (
-                changeRequests.map((request) => {
-                  const StatusIcon = statusConfig[request.status].icon;
-
-                  return (
-                    <TableRow key={request.id}>
-                      <TableCell className="font-medium">{request.title}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {request.documentName}
-                      </TableCell>
-                      <TableCell>{request.requestedBy}</TableCell>
-                      <TableCell>{new Date(request.requestDate).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={priorityConfig[request.priority]}
-                        >
-                          {request.priority}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={`${statusConfig[request.status].color} gap-1`}
-                        >
-                          <StatusIcon className="h-3 w-3" />
-                          {statusConfig[request.status].label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          View
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {requests.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      No change requests found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  requests.map((request) => {
+                    const StatusIcon = statusConfig[request.status]?.icon;
+                    return (
+                      <TableRow key={request.id}>
+                        <TableCell>{request.documentTitle ?? ''}</TableCell>
+                        <TableCell>{request.documentNumber ?? ''}</TableCell>
+                        <TableCell>{request.revision ?? ''}</TableCell>
+                        <TableCell>{request.requestDate ? new Date(request.requestDate).toLocaleDateString() : ''}</TableCell>
+                        <TableCell>{request.requestedBy ?? ''}</TableCell>
+                        <TableCell>{request.department ?? ''}</TableCell>
+                        <TableCell>{request.changeType ?? ''}</TableCell>
+                        <TableCell>{request.reason ?? ''}</TableCell>
+                        <TableCell>{request.description ?? ''}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={priorityConfig[request.priority ?? 'medium']}
+                          >
+                            {request.priority ?? 'medium'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{request.impactAssessment ?? ''}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={`${statusConfig[request.status]?.color ?? ''} gap-1`}
+                          >
+                            {StatusIcon && <StatusIcon className="h-3 w-3" />}
+                            {statusConfig[request.status]?.label ?? request.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm">
+                            View
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>
