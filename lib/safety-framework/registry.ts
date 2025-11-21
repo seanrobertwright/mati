@@ -164,6 +164,12 @@ export async function discoverModules(): Promise<void> {
       console.log('Loaded document-management module');
     }
 
+    const capaManagement = await import('@/lib/modules/capa-management');
+    if (capaManagement.default) {
+      modules.push(capaManagement.default);
+      console.log('Loaded capa-management module');
+    }
+
     // Future modules can be added here:
     // const anotherModule = await import('@/lib/modules/another-module');
     // if (anotherModule.default) {
