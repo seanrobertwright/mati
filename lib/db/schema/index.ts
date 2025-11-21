@@ -4,4 +4,5 @@ export * from './directory-permissions';
 export * from './documents';
 export * from './change-requests';
 export * from './document-audit-log';
+export * from './capa';
 

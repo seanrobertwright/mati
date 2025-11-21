@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Hierarchical Directory Structure
 The system SHALL provide a hierarchical directory structure for organizing documents similar to a file manager interface.

@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Document Repository Operations
 The system SHALL provide repository functions for document CRUD operations following the established repository pattern.
