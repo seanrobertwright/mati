@@ -1,0 +1,141 @@
+On branch master
+Your branch and 'origin/master' have diverged,
+and have 1 and 4 different commits each, respectively.
+  (use "git pull" if you want to integrate the remote branch with yours)
+
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Changes to be committed:
+	new file:   AUTHENTICATION_COMPLETE.md
+	new file:   AUTHENTICATION_TESTING_FINAL_REPORT.md
+	new file:   DOCUMENT_SUBMENU_IMPLEMENTATION.md
+	new file:   Implementation/ADMIN_ROLE_FIX.md
+	renamed:    AUTHENTICATION_REQUIRED_SOLUTION.md -> Implementation/AUTHENTICATION_REQUIRED_SOLUTION.md
+	new file:   Implementation/AUTHENTICATION_TESTING_GUIDE.md
+	new file:   Implementation/AUTH_SESSION_UPDATE.md
+	renamed:    BUTTONS_FIXED.md -> Implementation/BUTTONS_FIXED.md
+	renamed:    DATABASE_DIRECTORIES_WORKING.md -> Implementation/DATABASE_DIRECTORIES_WORKING.md
+	new file:   Implementation/DCR Form.md
+	renamed:    DEBUG_SUPABASE.md -> Implementation/DEBUG_SUPABASE.md
+	renamed:    DIRECTORY_LOADING_ERROR_FIXED.md -> Implementation/DIRECTORY_LOADING_ERROR_FIXED.md
+	new file:   Implementation/DOCUMENT_DISPLAY_FIXED.md
+	renamed:    ENABLE_DEV_MODE.md -> Implementation/ENABLE_DEV_MODE.md
+	new file:   Implementation/EXPECTED_UI.md
+	renamed:    FIX_APPLIED.md -> Implementation/FIX_APPLIED.md
+	renamed:    FOLDER_CREATION_FIXED.md -> Implementation/FOLDER_CREATION_FIXED.md
+	new file:   Implementation/FOLDER_UI_FIX.md
+	renamed:    IMPLEMENTATION_SUMMARY.md -> Implementation/IMPLEMENTATION_SUMMARY.md
+	new file:   Implementation/LIVE_TEST_RESULTS.md
+	renamed:    LOCAL_SUPABASE_READY.md -> Implementation/LOCAL_SUPABASE_READY.md
+	renamed:    MODULE_AND_DIRECTORY_FIXES.md -> Implementation/MODULE_AND_DIRECTORY_FIXES.md
+	renamed:    NETWORK_BLOCK_ISSUE.md -> Implementation/NETWORK_BLOCK_ISSUE.md
+	new file:   Implementation/QUICK_TEST_GUIDE.md
+	new file:   Implementation/RETEST_3.6_INSTRUCTIONS.md
+	renamed:    RETRY_FIX.md -> Implementation/RETRY_FIX.md
+	new file:   Implementation/SERVER_ACTION_ERROR_FIXED.md
+	new file:   Implementation/SESSION_COMPLETE_OCT16.md
+	renamed:    SETUP_LOCAL_SUPABASE.md -> Implementation/SETUP_LOCAL_SUPABASE.md
+	renamed:    SIMPLE_FIX_OPTIONS.md -> Implementation/SIMPLE_FIX_OPTIONS.md
+	renamed:    SPORADIC_404_FIXED.md -> Implementation/SPORADIC_404_FIXED.md
+	renamed:    SSL_FIX_APPLIED.md -> Implementation/SSL_FIX_APPLIED.md
+	renamed:    START_LOCAL_SUPABASE.md -> Implementation/START_LOCAL_SUPABASE.md
+	renamed:    SUPABASE_DEBUG_STEPS.md -> Implementation/SUPABASE_DEBUG_STEPS.md
+	renamed:    TASKS-18-20-IMPLEMENTATION-SUMMARY.md -> Implementation/TASKS-18-20-IMPLEMENTATION-SUMMARY.md
+	new file:   Implementation/TESTING_PROGRESS_REPORT.md
+	new file:   Implementation/TESTING_PROGRESS_REPORT_UPDATED.md
+	new file:   Implementation/TEST_1_SIGNUP_GUIDE.md
+	new file:   Implementation/TEST_2_LOGIN_LOGOUT_GUIDE.md
+	new file:   Implementation/TEST_3_AUTHORIZATION_GUIDE.md
+	new file:   Implementation/TEST_4_ROUTE_PROTECTION_GUIDE.md
+	new file:   Implementation/TEST_5.3_ANALYSIS.md
+	new file:   Implementation/TEST_5_EDGE_CASES_GUIDE.md
+	renamed:    UPDATE_ENV_LOCAL.md -> Implementation/UPDATE_ENV_LOCAL.md
+	new file:   Implementation/USER_MANAGEMENT_FINAL_RESULTS.md
+	new file:   Implementation/USER_MANAGEMENT_TESTING.md
+	new file:   Implementation/VIEWER_ROLE_FIX_SUMMARY.md
+	new file:   Implementation/VIEWER_ROLE_ISSUE_ANALYSIS.md
+	new file:   Implementation/WIN-FM-QUA-DC-001 Rev. 04 Document Change Request (DCR) (002).pdf
+	new file:   Implementation/WIN-FM-QUA-DC-001 Rev. 04 Document Change Request (DCR).docx
+	new file:   MODULE_DEVELOPMENT_GUIDE.md
+	new file:   NAVIGATION_FIX.md
+	modified:   README.md
+	new file:   ROLE_SYSTEM_DOCUMENTATION.md
+	new file:   app/api/change-requests/route.ts
+	new file:   app/dashboard/admin/users/UserListTable.tsx
+	new file:   app/dashboard/admin/users/actions.ts
+	modified:   app/dashboard/admin/users/page.tsx
+	new file:   app/dashboard/document-management/audit-log/page.tsx
+	new file:   app/dashboard/document-management/change-requests/ChangeRequestsClient.tsx
+	new file:   app/dashboard/document-management/change-requests/CreateChangeRequestDialog.tsx
+	new file:   app/dashboard/document-management/change-requests/actions.ts
+	new file:   app/dashboard/document-management/change-requests/page.tsx
+	new file:   app/dashboard/document-management/metrics/page.tsx
+	modified:   components/dashboard/app-sidebar.tsx
+	modified:   components/dashboard/sidebar-nav-items.tsx
+	new file:   components/ui/collapsible.tsx
+	modified:   components/ui/sidebar.tsx
+	new file:   drizzle/migrations/0004_fix_column_names.sql
+	new file:   lib/auth/USER_MANAGEMENT_IMPLEMENTATION.md
+	new file:   lib/auth/admin.ts
+	modified:   lib/db/repositories/change-requests.ts
+	modified:   lib/db/schema/change-requests.ts
+	new file:   lib/modules/document-management/DIRECTORY_TREE_FIX.md
+	new file:   lib/modules/document-management/DRAG_DROP_IMPLEMENTATION.md
+	modified:   lib/modules/document-management/DocumentRoute.tsx
+	new file:   lib/modules/document-management/FEATURE_COMPLETE.md
+	new file:   lib/modules/document-management/TESTING_GUIDE.md
+	new file:   lib/modules/document-management/TEST_RESULTS.md
+	modified:   lib/modules/document-management/actions/directories.ts
+	modified:   lib/modules/document-management/actions/documents.ts
+	modified:   lib/modules/document-management/actions/index.ts
+	modified:   lib/modules/document-management/components/DirectoryTree.tsx
+	modified:   lib/modules/document-management/components/DocumentListItem.tsx
+	modified:   lib/modules/document-management/components/DocumentUploadForm.tsx
+	new file:   lib/modules/document-management/hooks/useDragAndDrop.ts
+	modified:   lib/modules/document-management/index.ts
+	modified:   lib/modules/incident-reporting/index.ts
+	modified:   lib/safety-framework/types.ts
+	modified:   openspec/changes/archive/2025-10-10-add-document-management/tasks.md
+	renamed:    openspec/changes/implement-doc-folder-upload/IMPLEMENTATION.md -> openspec/changes/archive/2025-10-15-implement-doc-folder-upload/IMPLEMENTATION.md
+	renamed:    openspec/changes/implement-doc-folder-upload/design.md -> openspec/changes/archive/2025-10-15-implement-doc-folder-upload/design.md
+	renamed:    openspec/changes/implement-doc-folder-upload/proposal.md -> openspec/changes/archive/2025-10-15-implement-doc-folder-upload/proposal.md
+	renamed:    openspec/changes/implement-doc-folder-upload/specs/document-management/spec.md -> openspec/changes/archive/2025-10-15-implement-doc-folder-upload/specs/document-management/spec.md
+	renamed:    openspec/changes/implement-doc-folder-upload/tasks.md -> openspec/changes/archive/2025-10-15-implement-doc-folder-upload/tasks.md
+	modified:   package-lock.json
+	modified:   package.json
+	new file:   scripts/check-incidents.ts
+	new file:   scripts/set-admin-role.ts
+
+Unmerged paths:
+  (use "git add/rm <file>..." as appropriate to mark resolution)
+	both deleted:    openspec/changes/add-auth-system/design.md
+	both deleted:    openspec/changes/add-auth-system/proposal.md
+	both deleted:    openspec/changes/add-auth-system/specs/authentication/spec.md
+	both deleted:    openspec/changes/add-auth-system/specs/authorization/spec.md
+	both deleted:    openspec/changes/add-auth-system/specs/dashboard-core/spec.md
+	both deleted:    openspec/changes/add-auth-system/specs/incident-persistence/spec.md
+	both deleted:    openspec/changes/add-auth-system/specs/user-management/spec.md
+	both deleted:    openspec/changes/add-auth-system/tasks.md
+	added by us:     openspec/changes/archive/2025-10-10-add-auth-system/design.md
+	added by us:     openspec/changes/archive/2025-10-10-add-auth-system/proposal.md
+	added by us:     openspec/changes/archive/2025-10-10-add-auth-system/specs/authentication/spec.md
+	added by us:     openspec/changes/archive/2025-10-10-add-auth-system/specs/authorization/spec.md
+	added by us:     openspec/changes/archive/2025-10-10-add-auth-system/specs/dashboard-core/spec.md
+	added by us:     openspec/changes/archive/2025-10-10-add-auth-system/specs/incident-persistence/spec.md
+	added by us:     openspec/changes/archive/2025-10-10-add-auth-system/specs/user-management/spec.md
+	added by us:     openspec/changes/archive/2025-10-10-add-auth-system/tasks.md
+	added by them:   openspec/changes/archive/2025-10-17-add-auth-system/design.md
+	added by them:   openspec/changes/archive/2025-10-17-add-auth-system/proposal.md
+	added by them:   openspec/changes/archive/2025-10-17-add-auth-system/specs/authentication/spec.md
+	added by them:   openspec/changes/archive/2025-10-17-add-auth-system/specs/authorization/spec.md
+	added by them:   openspec/changes/archive/2025-10-17-add-auth-system/specs/dashboard-core/spec.md
+	added by them:   openspec/changes/archive/2025-10-17-add-auth-system/specs/incident-persistence/spec.md
+	added by them:   openspec/changes/archive/2025-10-17-add-auth-system/specs/user-management/spec.md
+	added by them:   openspec/changes/archive/2025-10-17-add-auth-system/tasks.md
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	git_status_output.txt
+
