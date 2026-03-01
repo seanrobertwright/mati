@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"E:/codebase/mati/.rlm/hooks/rlm-session-end.js\""
+          }
+        ]
+      }
+    ]
+  }
+}

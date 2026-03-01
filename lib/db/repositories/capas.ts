@@ -1,4 +1,5 @@
-import { eq, desc, and, or, ilike } from 'drizzle-orm';
+import { eq, desc, and, lt, gte, sql, ne } from 'drizzle-orm';
+import { capaActions } from '../schema/capa';
 import { db } from '../client';
 import { capas } from '../schema/capa';
 import { CAPA, NewCAPA } from '../types';
@@ -59,7 +60,7 @@ export async function getCAPAById(id: string): Promise<CAPA | null> {
  * Create a new CAPA
  */
 export async function createCAPA(
-    data: Omit<NewCAPA, 'id' | 'initiatedAt' | 'status' | 'currentStep' | 'number'>,
+    data: Omit<NewCAPA, 'id' | 'initiatedAt' | 'status' | 'currentStep' | 'number' | 'initiatedBy'>,
     user: User
 ): Promise<CAPA> {
     try {
@@ -161,9 +162,8 @@ export async function transitionCAPAStatus(
             currentStep: step,
         };
 
-        if (status === 'completed') {
+        if (status === 'closed') {
             updateData.completedAt = new Date();
-        } else if (status === 'closed') {
             updateData.closedAt = new Date();
         }
 
@@ -177,5 +177,70 @@ export async function transitionCAPAStatus(
     } catch (error) {
         console.error(`Error transitioning CAPA ${id}:`, error);
         throw new Error('Failed to transition CAPA status');
+    }
+}
+
+/**
+ * Get CAPA metrics for dashboard widget
+ */
+export async function getCAPAMetrics(): Promise<{
+    activeCount: number;
+    overdueActionsCount: number;
+    pendingVerificationCount: number;
+    closedThisMonthCount: number;
+}> {
+    try {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        // Get all active CAPAs (not closed)
+        const activeCAPAs = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(capas)
+            .where(ne(capas.status, 'closed'));
+
+        // Get overdue actions (actions with due date in the past and not completed)
+        const overdueActions = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(capaActions)
+            .where(
+                and(
+                    lt(capaActions.dueDate, now),
+                    ne(capaActions.status, 'completed'),
+                    ne(capaActions.status, 'cancelled')
+                )
+            );
+
+        // Get CAPAs pending verification
+        const pendingVerification = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(capas)
+            .where(eq(capas.status, 'verification'));
+
+        // Get CAPAs closed this month
+        const closedThisMonth = await db
+            .select({ count: sql<number>`count(*)` })
+            .from(capas)
+            .where(
+                and(
+                    eq(capas.status, 'closed'),
+                    gte(capas.closedAt, startOfMonth)
+                )
+            );
+
+        return {
+            activeCount: Number(activeCAPAs[0]?.count ?? 0),
+            overdueActionsCount: Number(overdueActions[0]?.count ?? 0),
+            pendingVerificationCount: Number(pendingVerification[0]?.count ?? 0),
+            closedThisMonthCount: Number(closedThisMonth[0]?.count ?? 0),
+        };
+    } catch (error) {
+        console.error('Error fetching CAPA metrics:', error);
+        return {
+            activeCount: 0,
+            overdueActionsCount: 0,
+            pendingVerificationCount: 0,
+            closedThisMonthCount: 0,
+        };
     }
 }

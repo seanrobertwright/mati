@@ -11,12 +11,12 @@ if ($existing -eq "supabase-db-forward") {
 }
 
 # Create new port forward
-docker run -d --name supabase-db-forward --network localai_default -p 54322:5432 alpine/socat tcp-listen:5432,fork,reuseaddr tcp-connect:supabase-db:5432
+docker run -d --name supabase-db-forward --network localai_default -p 5432:5432 alpine/socat tcp-listen:5432,fork,reuseaddr tcp-connect:supabase-db:5432
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "✅ Port forward active: localhost:54322 -> supabase-db:5432" -ForegroundColor Green
+    Write-Host "✅ Port forward active: localhost:5432 -> supabase-db:5432" -ForegroundColor Green
     Write-Host "Update your .env.local to use:" -ForegroundColor Cyan
-    Write-Host "DATABASE_URL=postgresql://postgres:Muadi70!!@127.0.0.1:54322/postgres" -ForegroundColor White
+    Write-Host "DATABASE_URL=postgresql://postgres:Muadi70!!@127.0.0.1:5432/postgres" -ForegroundColor White
 } else {
     Write-Host "❌ Failed to create port forward" -ForegroundColor Red
 }

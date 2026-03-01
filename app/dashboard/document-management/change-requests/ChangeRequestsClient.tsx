@@ -36,7 +36,7 @@ interface ChangeRequestsClientProps {
   changeRequests?: ChangeRequest[];
 }
 
-// Type for new requests (without id/status)
+// Type for new requests (without id/status) - matches the form structure
 interface NewChangeRequest {
   documentTitle: string;
   documentNumber: string;
@@ -47,8 +47,16 @@ interface NewChangeRequest {
   changeType: string;
   reason: string;
   description: string;
-  priority: 'high' | 'medium' | 'low' | 'critical' | null;
+  priority: 'high' | 'medium' | 'low' | 'critical';
   impactAssessment: string;
+  affectedDocuments: string;
+  proposedBy: string;
+  reviewedBy: string;
+  approvedBy: string;
+  implementationDate?: Date;
+  trainingRequired: string;
+  retrainingRequired: string;
+  additionalNotes: string;
 }
 
 export function ChangeRequestsClient({ changeRequests }: ChangeRequestsClientProps) {

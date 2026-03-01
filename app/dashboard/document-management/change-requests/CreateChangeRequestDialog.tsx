@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import type { NewChangeRequest } from '@/lib/db/repositories/change-requests';
+// TODO: Fix type mismatch - UI form has different structure than database schema
+// import type { NewChangeRequest } from '@/lib/db/repositories/change-requests';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +17,30 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export function CreateChangeRequestDialog({ onCreate }: { onCreate?: (data: NewChangeRequest) => void }) {
+// Temporary form type until we align with database schema
+interface ChangeRequestFormData {
+  documentTitle: string;
+  documentNumber: string;
+  revision: string;
+  requestDate: Date;
+  requestedBy: string;
+  department: string;
+  changeType: 'revision' | 'addition' | 'deletion' | 'clarification';
+  reason: string;
+  description: string;
+  impactAssessment: string;
+  affectedDocuments: string;
+  proposedBy: string;
+  reviewedBy: string;
+  approvedBy: string;
+  implementationDate?: Date;
+  trainingRequired: string;
+  retrainingRequired: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  additionalNotes: string;
+}
+
+export function CreateChangeRequestDialog({ onCreate }: { onCreate?: (data: ChangeRequestFormData) => void }) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({

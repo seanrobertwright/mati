@@ -179,6 +179,53 @@ export async function storeFile(
 }
 
 /**
+ * Download file metadata (for API routes)
+ * Returns file path and metadata needed for download
+ */
+export async function downloadFile(filePath: string, userId?: string, documentId?: string): Promise<{
+  fullPath: string;
+  fileName: string;
+  fileSize: number;
+  mimeType?: string;
+}> {
+  const basePath = getDocumentStoragePath();
+  const fullPath = path.join(basePath, filePath);
+
+  try {
+    // Enhanced security check
+    validateFilePath(fullPath, basePath);
+
+    // Verify file exists and is a file (not a directory)
+    const stats = await fs.stat(fullPath);
+    if (!stats.isFile()) {
+      throw new Error('Path is not a file');
+    }
+
+    // Audit log
+    await logAudit({
+      action: 'FILE_DOWNLOAD',
+      resourceType: 'document',
+      resourceId: documentId || 'unknown',
+      userId: userId || 'system',
+      details: {
+        filePath,
+        fileSize: stats.size,
+      },
+    });
+
+    // Return file metadata
+    return {
+      fullPath,
+      fileName: path.basename(filePath),
+      fileSize: stats.size,
+    };
+  } catch (error) {
+    console.error('Error preparing file download:', error);
+    throw new Error('Failed to prepare file download');
+  }
+}
+
+/**
  * Retrieve file from storage
  */
 export async function getFile(filePath: string, userId?: string, documentId?: string): Promise<Buffer> {

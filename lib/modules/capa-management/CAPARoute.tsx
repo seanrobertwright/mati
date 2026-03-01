@@ -1,93 +1,50 @@
-'use client';
+import { Suspense } from 'react';
+import CAPAList from './CAPAList';
+import { CAPACreateForm } from './CAPACreateForm';
+import { Card, CardContent } from '@/components/ui/card';
+import type { ModuleRouteProps } from '@/lib/safety-framework';
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Filter, Download } from 'lucide-react';
-
-export default function CAPARoute() {
+function CAPAListSkeleton() {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">CAPA Management</h1>
-                    <p className="text-muted-foreground">
-                        Corrective and Preventive Actions tracking and management
-                    </p>
+                    <div className="h-8 w-48 bg-muted animate-pulse rounded" />
+                    <div className="h-4 w-64 bg-muted animate-pulse rounded mt-2" />
                 </div>
-                <div className="flex gap-2">
-                    <Button variant="outline">
-                        <Filter className="mr-2 h-4 w-4" />
-                        Filter
-                    </Button>
-                    <Button variant="outline">
-                        <Download className="mr-2 h-4 w-4" />
-                        Export
-                    </Button>
-                    <Button>
-                        <Plus className="mr-2 h-4 w-4" />
-                        New CAPA
-                    </Button>
-                </div>
+                <div className="h-10 w-24 bg-muted animate-pulse rounded" />
             </div>
 
-            <Tabs defaultValue="active" className="space-y-4">
-                <TabsList>
-                    <TabsTrigger value="active">Active</TabsTrigger>
-                    <TabsTrigger value="pending">Pending Review</TabsTrigger>
-                    <TabsTrigger value="closed">Closed</TabsTrigger>
-                    <TabsTrigger value="all">All Records</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="active" className="space-y-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Active CAPAs</CardTitle>
-                            <CardDescription>
-                                Manage ongoing corrective and preventive actions
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-center py-10 text-muted-foreground">
-                                No active CAPAs found. Create one to get started.
-                            </div>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                {[...Array(5)].map((_, i) => (
+                    <Card key={i}>
+                        <CardContent className="pt-6">
+                            <div className="h-8 w-12 bg-muted animate-pulse rounded" />
+                            <div className="h-3 w-16 bg-muted animate-pulse rounded mt-2" />
                         </CardContent>
                     </Card>
-                </TabsContent>
+                ))}
+            </div>
 
-                <TabsContent value="pending">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Pending Review</CardTitle>
-                            <CardDescription>
-                                CAPAs waiting for effectiveness verification or closure
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-center py-10 text-muted-foreground">
-                                No CAPAs pending review.
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                <TabsContent value="closed">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Closed CAPAs</CardTitle>
-                            <CardDescription>
-                                Historical record of completed actions
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-center py-10 text-muted-foreground">
-                                No closed CAPAs found.
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+            <Card>
+                <div className="p-4">
+                    <div className="h-64 bg-muted animate-pulse rounded" />
+                </div>
+            </Card>
         </div>
+    );
+}
+
+export default async function CAPARoute({ params }: ModuleRouteProps) {
+    const { subpage } = await params;
+
+    if (subpage?.[0] === 'new') {
+        return <CAPACreateForm />;
+    }
+
+    return (
+        <Suspense fallback={<CAPAListSkeleton />}>
+            <CAPAList />
+        </Suspense>
     );
 }

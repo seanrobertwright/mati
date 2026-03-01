@@ -43,3 +43,6 @@ documents/*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# RLM Navigator (local install)
+.rlm/

@@ -1,6 +1,6 @@
 import { SafetyModule } from './types';
 import { validateModule } from './validation';
-import { canAccessModule, type UserRole } from '@/lib/auth/permissions';
+import { canAccessModule } from '@/lib/auth/permissions';
 import type { User } from '@supabase/supabase-js';
 
 /**
@@ -92,9 +92,9 @@ class ModuleRegistry {
    * Check if a user can access a specific module
    */
   canUserAccessModule(user: User | null, moduleId: string): boolean {
-    const module = this.getModule(moduleId);
-    if (!module) return false;
-    return canAccessModule(user, module.minRole);
+    const safetyModule = this.getModule(moduleId);
+    if (!safetyModule) return false;
+    return canAccessModule(user, safetyModule.minRole);
   }
 
   /**

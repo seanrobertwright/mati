@@ -30,20 +30,14 @@ const capaManagementModule: SafetyModule = {
             label: 'CAPA Management',
             href: '/capa-management',
             icon: CAPAIcon,
-            children: [
-                {
-                    label: 'Active CAPAs',
-                    href: '/capa-management?tab=active',
-                },
-                {
-                    label: 'Investigations',
-                    href: '/capa-management/investigations',
-                },
-                {
-                    label: 'Metrics',
-                    href: '/capa-management/metrics',
-                },
-            ],
+        },
+        {
+            label: 'Investigations',
+            href: '/capa-management/investigations',
+        },
+        {
+            label: 'Metrics',
+            href: '/capa-management/metrics',
         },
     ],
 

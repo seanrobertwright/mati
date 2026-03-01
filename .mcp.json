@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "rlm-navigator": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "E:\\codebase\\mati\\.rlm\\server\\build\\index.js"
+      ],
+      "env": {}
+    }
+  }
+}

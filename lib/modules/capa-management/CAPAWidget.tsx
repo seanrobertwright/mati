@@ -3,36 +3,41 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { getCAPAMetrics } from '@/lib/db/repositories/capas';
 
-export default function CAPAWidget() {
+export default async function CAPAWidget() {
+    const metrics = await getCAPAMetrics();
+
     return (
         <Card className="h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">CAPA Status</CardTitle>
-                <Badge variant="outline">3 Active</Badge>
+                <Badge variant="outline">{metrics.activeCount} Active</Badge>
             </CardHeader>
             <CardContent>
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                            <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                            <AlertTriangle className={`h-4 w-4 ${metrics.overdueActionsCount > 0 ? 'text-destructive' : 'text-yellow-500'}`} />
                             <span className="text-sm font-medium">Overdue Actions</span>
                         </div>
-                        <span className="text-sm font-bold">1</span>
+                        <span className={`text-sm font-bold ${metrics.overdueActionsCount > 0 ? 'text-destructive' : ''}`}>
+                            {metrics.overdueActionsCount}
+                        </span>
                     </div>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                             <Clock className="h-4 w-4 text-blue-500" />
-                            <span className="text-sm font-medium">Pending Review</span>
+                            <span className="text-sm font-medium">Pending Verification</span>
                         </div>
-                        <span className="text-sm font-bold">2</span>
+                        <span className="text-sm font-bold">{metrics.pendingVerificationCount}</span>
                     </div>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                             <CheckCircle className="h-4 w-4 text-green-500" />
                             <span className="text-sm font-medium">Closed this Month</span>
                         </div>
-                        <span className="text-sm font-bold">5</span>
+                        <span className="text-sm font-bold">{metrics.closedThisMonthCount}</span>
                     </div>
 
                     <Button asChild className="w-full mt-4" variant="outline" size="sm">
