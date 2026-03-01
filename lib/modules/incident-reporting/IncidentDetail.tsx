@@ -1,10 +1,10 @@
-import { getIncidentById } from './data';
+import { getIncidentById } from '@/lib/db/repositories/incidents';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { IncidentActions } from './IncidentActions';
 
-/**
- * Incident detail view - Server Component with async data fetching
- */
 export default async function IncidentDetail({ incidentId }: { incidentId: string }) {
   const incident = await getIncidentById(incidentId);
 
@@ -33,12 +33,19 @@ export default async function IncidentDetail({ incidentId }: { incidentId: strin
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Link href="/dashboard/incident-reporting">
+          <Button variant="outline" size="sm">Back to List</Button>
+        </Link>
+      </div>
+
       <div>
         <h1 className="text-2xl font-bold">{incident.title}</h1>
         <div className="flex items-center gap-3 mt-2">
           <Badge variant={getSeverityVariant(incident.severity)}>
             {incident.severity}
           </Badge>
+          <Badge variant="outline">{incident.status}</Badge>
           <span className="text-sm text-muted-foreground">
             Reported by {incident.reportedBy} on{' '}
             {incident.reportedAt.toLocaleDateString()}
@@ -73,7 +80,20 @@ export default async function IncidentDetail({ incidentId }: { incidentId: strin
               <dt className="text-sm font-medium text-muted-foreground">Incident ID</dt>
               <dd className="mt-1 font-mono text-sm">{incident.id}</dd>
             </div>
+            <div>
+              <dt className="text-sm font-medium text-muted-foreground">CAPA Required</dt>
+              <dd className="mt-1">{incident.capaRequired ? 'Yes' : 'No'}</dd>
+            </div>
           </dl>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <IncidentActions incidentId={incident.id} currentStatus={incident.status} />
         </CardContent>
       </Card>
     </div>

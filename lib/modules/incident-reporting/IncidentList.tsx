@@ -1,4 +1,5 @@
-import { getIncidents } from './data';
+import { getIncidentsForUser } from '@/lib/db/repositories/incidents';
+import { createClient } from '@/lib/auth/server';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,12 +11,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import Link from 'next/link';
 
-/**
- * Incident list view - Server Component with async data fetching
- */
 export default async function IncidentList() {
-  const allIncidents = await getIncidents();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const allIncidents = await getIncidentsForUser(user);
 
   const getSeverityVariant = (severity: string) => {
     switch (severity) {
@@ -34,9 +35,12 @@ export default async function IncidentList() {
   const getStatusVariant = (status: string) => {
     switch (status) {
       case 'resolved':
+      case 'closed':
         return 'secondary' as const;
       case 'investigating':
         return 'default' as const;
+      case 'open':
+        return 'destructive' as const;
       default:
         return 'outline' as const;
     }
@@ -51,10 +55,11 @@ export default async function IncidentList() {
             Track and manage safety incidents across your organization
           </p>
         </div>
-        <Button>Report New Incident</Button>
+        <Link href="/dashboard/incident-reporting/new">
+          <Button>Report New Incident</Button>
+        </Link>
       </div>
 
-      {/* Summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-6">
@@ -88,7 +93,6 @@ export default async function IncidentList() {
         </Card>
       </div>
 
-      {/* Incidents table */}
       <Card>
         <Table>
           <TableHeader>
@@ -101,32 +105,45 @@ export default async function IncidentList() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {allIncidents.map((incident) => (
-              <TableRow key={incident.id}>
-                <TableCell>
-                  <div className="font-medium">{incident.title}</div>
-                  <div className="text-sm text-muted-foreground truncate max-w-md">
-                    {incident.description}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={getSeverityVariant(incident.severity)}>
-                    {incident.severity}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={getStatusVariant(incident.status)}>
-                    {incident.status}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-sm">
-                  {incident.reportedAt.toLocaleDateString()}
-                </TableCell>
-                <TableCell className="text-sm">
-                  {incident.reportedBy}
+            {allIncidents.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                  No incidents reported yet.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              allIncidents.map((incident) => (
+                <TableRow key={incident.id}>
+                  <TableCell>
+                    <Link
+                      href={`/dashboard/incident-reporting/${incident.id}`}
+                      className="block"
+                    >
+                      <div className="font-medium hover:underline">{incident.title}</div>
+                      <div className="text-sm text-muted-foreground truncate max-w-md">
+                        {incident.description}
+                      </div>
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={getSeverityVariant(incident.severity)}>
+                      {incident.severity}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={getStatusVariant(incident.status)}>
+                      {incident.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {incident.reportedAt.toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {incident.reportedBy}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </Card>

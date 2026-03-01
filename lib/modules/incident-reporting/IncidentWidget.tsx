@@ -1,12 +1,11 @@
-import { getIncidents } from './data';
+import { getIncidentsForUser } from '@/lib/db/repositories/incidents';
+import { createClient } from '@/lib/auth/server';
 import { Badge } from '@/components/ui/badge';
 
-/**
- * Dashboard widget showing recent incidents - Server Component with async data fetching
- * This appears on the dashboard home page
- */
 export default async function IncidentWidget() {
-  const allIncidents = await getIncidents();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const allIncidents = await getIncidentsForUser(user);
   const recentIncidents = allIncidents.slice(0, 3);
 
   const getSeverityVariant = (severity: string) => {
