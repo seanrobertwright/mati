@@ -79,19 +79,3 @@ const documentManagementModule: SafetyModule = {
 };
 
 export default documentManagementModule;
-
-// Export validation utilities
-export * from './validation';
-
-// Export error handling utilities
-export * from './errors';
-
-// Export components
-export * from './components';
-
-// Export actions (server actions for client components)
-export * as DocumentActions from './actions';
-
-// Export services (business logic)
-export * as DocumentServices from './services';
-
