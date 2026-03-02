@@ -357,7 +357,7 @@ describe('Permission Caching', () => {
   });
 
   it('should invalidate cache when document status changes', () => {
-    const documentStatus = 'draft';
+    const documentStatus: string = 'draft';
     let cacheValid = true;
 
     // Status change should invalidate cache

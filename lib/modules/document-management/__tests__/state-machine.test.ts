@@ -324,7 +324,7 @@ describe('Document State Machine Transitions', () => {
     });
 
     it('should prevent transitions without proper role', () => {
-      const userRole = 'viewer';
+      const userRole: string = 'viewer';
       const canApprove = userRole === 'approver' || userRole === 'admin';
       expect(canApprove).toBe(false);
     });

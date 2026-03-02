@@ -3,11 +3,11 @@
  * Runs before all tests
  */
 
-import { beforeAll, afterAll, afterEach } from 'vitest';
+import { beforeAll, afterAll, afterEach, vi } from 'vitest';
 
 // Mock environment variables
 process.env.DOCUMENT_STORAGE_PATH = '/tmp/test-documents';
-process.env.NODE_ENV = 'test';
+Object.defineProperty(process.env, 'NODE_ENV', { value: 'test', writable: true });
 
 // Setup before all tests
 beforeAll(() => {
