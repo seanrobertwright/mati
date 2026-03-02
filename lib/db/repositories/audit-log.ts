@@ -151,11 +151,11 @@ export async function searchAuditLog(
       .orderBy(desc(documentAuditLog.timestamp));
 
     if (filters?.limit) {
-      query = query.limit(filters.limit);
+      query = (query as any).limit(filters.limit);
     }
 
     if (filters?.offset) {
-      query = query.offset(filters.offset);
+      query = (query as any).offset(filters.offset);
     }
 
     return await query;
@@ -231,7 +231,7 @@ export async function deleteOldAuditEntries(olderThanDays: number): Promise<numb
       .delete(documentAuditLog)
       .where(lte(documentAuditLog.timestamp, cutoffDate));
 
-    return result.rowCount || 0;
+    return result.length;
   } catch (error) {
     console.error('Error deleting old audit entries:', error);
     throw new Error('Failed to delete old audit entries');

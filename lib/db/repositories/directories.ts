@@ -123,7 +123,7 @@ export async function getDirectoryTree(rootId?: string): Promise<DirectoryWithCh
         `;
 
     const result = await db.execute(query);
-    return result.rows as DirectoryWithChildren[];
+    return result as unknown as DirectoryWithChildren[];
   } catch (error) {
     console.error('Error getting directory tree:', error);
     console.log('Falling back to simple query...');
@@ -245,7 +245,7 @@ async function checkCircularReference(directoryId: string, newParentId: string):
     `;
 
     const result = await db.execute(query);
-    return (result.rows[0] as any).is_circular;
+    return (result[0] as any).is_circular;
   } catch (error) {
     console.error('Error checking circular reference:', error);
     return true; // Fail safe - prevent move if we can't verify
@@ -274,7 +274,7 @@ export async function getDirectoryPath(directoryId: string): Promise<Directory[]
     `;
 
     const result = await db.execute(query);
-    return result.rows as Directory[];
+    return result as unknown as Directory[];
   } catch (error) {
     console.error('Error fetching directory path:', error);
     throw new Error('Failed to fetch directory path');

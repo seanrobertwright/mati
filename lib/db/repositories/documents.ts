@@ -133,7 +133,7 @@ export async function getDocumentsByDirectory(
     }
 
     if (options?.status && options.status.length > 0) {
-      conditions.push(inArray(documents.status, options.status));
+      conditions.push(inArray(documents.status, options.status as ('draft' | 'pending_review' | 'pending_approval' | 'approved' | 'under_review' | 'archived')[]));
     }
 
     if (options?.categoryId) {
@@ -184,7 +184,7 @@ export async function searchDocuments(
     }
 
     if (options?.status && options.status.length > 0) {
-      conditions.push(inArray(documents.status, options.status));
+      conditions.push(inArray(documents.status, options.status as ('draft' | 'pending_review' | 'pending_approval' | 'approved' | 'under_review' | 'archived')[]));
     }
 
     if (options?.categoryId) {
@@ -231,7 +231,7 @@ export async function getDocumentsByStatus(status: string[]): Promise<Document[]
     return await db
       .select()
       .from(documents)
-      .where(inArray(documents.status, status))
+      .where(inArray(documents.status, status as ('draft' | 'pending_review' | 'pending_approval' | 'approved' | 'under_review' | 'archived')[]))
       .orderBy(desc(documents.updatedAt));
   } catch (error) {
     console.error('Error fetching documents by status:', error);

@@ -130,7 +130,10 @@ export async function getAllChangeRequests(options?: {
     }
 
     if (options?.priority && options.priority.length > 0) {
-      conditions.push(inArray(changeRequests.priority, options.priority));
+      const nonNullPriorities = options.priority.filter((p): p is NonNullable<typeof p> => p != null);
+      if (nonNullPriorities.length > 0) {
+        conditions.push(inArray(changeRequests.priority, nonNullPriorities));
+      }
     }
 
     if (options?.documentId) {
