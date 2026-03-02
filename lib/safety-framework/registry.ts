@@ -143,49 +143,23 @@ export const registry = new ModuleRegistry();
  */
 export async function discoverModules(): Promise<void> {
   if (registry.isInitialized()) {
-    console.log('Modules already initialized, skipping discovery');
     return;
   }
 
-  const modules: SafetyModule[] = [];
+  const { modules } = await import('@/lib/modules');
 
-  try {
-    // Import all module files from lib/modules
-    // Add new modules here as they are created
-    const incidentReporting = await import('@/lib/modules/incident-reporting');
-    if (incidentReporting.default) {
-      modules.push(incidentReporting.default);
-      console.log('Loaded incident-reporting module');
+  for (const mod of modules) {
+    try {
+      registry.register(mod);
+    } catch (error) {
+      console.error(`Failed to register module '${mod?.id ?? 'unknown'}':`, error);
+      // Continue loading other modules
     }
-
-    const documentManagement = await import('@/lib/modules/document-management');
-    if (documentManagement.default) {
-      modules.push(documentManagement.default);
-      console.log('Loaded document-management module');
-    }
-
-    const capaManagement = await import('@/lib/modules/capa-management');
-    if (capaManagement.default) {
-      modules.push(capaManagement.default);
-      console.log('Loaded capa-management module');
-    }
-
-    // Future modules can be added here:
-    // const anotherModule = await import('@/lib/modules/another-module');
-    // if (anotherModule.default) {
-    //   modules.push(anotherModule.default);
-    // }
-  } catch (error) {
-    // If modules don't exist yet, that's okay
-    console.warn('Error loading modules:', error);
   }
 
-  if (modules.length === 0) {
+  if (registry.getModuleCount() === 0) {
     console.warn('No modules were loaded during discovery');
-  } else {
-    console.log(`Loaded ${modules.length} modules:`, modules.map(m => m.id));
   }
 
-  registry.registerAll(modules);
   registry.markInitialized();
 }
