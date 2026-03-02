@@ -306,7 +306,7 @@ export type DocumentSearchInput = z.infer<typeof documentSearchSchema>;
 
 // Helper function to format validation errors
 export function formatZodError(error: z.ZodError): string {
-  const firstError = error.errors[0];
+  const firstError = error.issues[0];
   if (firstError) {
     return firstError.message;
   }

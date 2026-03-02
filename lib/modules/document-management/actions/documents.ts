@@ -7,10 +7,10 @@ import {
   updateDocument as dbUpdateDocument,
   deleteDocument as dbDeleteDocument,
   getDocumentById,
-  listDocuments,
+  getDocumentsByDirectory,
 } from '@/lib/db/repositories/documents';
 import { canEditDocument, canDeleteDocument, canViewDocument } from '@/lib/auth/permissions';
-import { createAuditLog } from '@/lib/db/repositories/audit-log';
+import { logDocumentAction } from '@/lib/db/repositories/audit-log';
 
 /**
  * Server action to create a new document

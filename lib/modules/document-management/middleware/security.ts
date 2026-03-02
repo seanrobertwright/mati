@@ -74,7 +74,7 @@ export function withRateLimit(
 ) {
   return async (req: NextRequest, ...args: any[]): Promise<Response> => {
     // Get identifier (IP address or user ID from auth)
-    const identifier = req.ip || req.headers.get('x-forwarded-for') || 'unknown';
+    const identifier = req.headers.get('x-forwarded-for') || 'unknown';
 
     // Check rate limit
     if (!rateLimiter.isAllowed(identifier, config)) {

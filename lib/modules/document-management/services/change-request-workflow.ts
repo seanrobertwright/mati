@@ -176,7 +176,7 @@ export async function approveChangeRequest(
     const pendingApprovals = allApprovals.filter((a) => a.status === 'pending');
     const rejectedApprovals = allApprovals.filter((a) => a.status === 'rejected');
 
-    let newStatus: ChangeRequestStatus = changeRequest.status as ChangeRequestStatus;
+    let newStatus = changeRequest.status as typeof changeRequests.$inferInsert.status;
 
     if (rejectedApprovals.length > 0) {
       newStatus = 'rejected';
@@ -295,7 +295,7 @@ export async function cancelChangeRequest(
     await tx
       .update(changeRequests)
       .set({
-        status: 'cancelled',
+        status: 'cancelled' as typeof changeRequests.$inferInsert.status,
         updatedAt: new Date(),
       })
       .where(eq(changeRequests.id, changeRequestId));

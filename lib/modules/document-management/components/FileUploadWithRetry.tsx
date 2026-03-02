@@ -112,12 +112,12 @@ export const FileUploadWithRetry: React.FC<FileUploadWithRetryProps> = ({
     const filesArray = Array.from(newFiles);
     
     const validatedFiles: FileWithStatus[] = filesArray.map(file => {
-      const error = handleFileValidation(file);
+      const validationError = handleFileValidation(file);
       return {
         file,
-        status: error ? ('error' as UploadStatus) : ('idle' as UploadStatus),
+        status: validationError ? ('error' as UploadStatus) : ('idle' as UploadStatus),
         progress: 0,
-        error,
+        error: validationError ?? undefined,
         retryCount: 0,
       };
     });

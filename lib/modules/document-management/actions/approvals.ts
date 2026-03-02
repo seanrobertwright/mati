@@ -4,8 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/auth/server';
 import { getDocumentById } from '@/lib/db/repositories/documents';
 import { canApproveDocument } from '@/lib/auth/permissions';
-import { createAuditLog } from '@/lib/db/repositories/audit-log';
-import { transitionDocumentState } from '@/lib/modules/document-management/services/document-lifecycle';
+import { logDocumentAction } from '@/lib/db/repositories/audit-log';
+import { submitForReview as lifecycleSubmitForReview, approveDocument as lifecycleApproveDocument } from '@/lib/modules/document-management/services/document-lifecycle';
 
 /**
  * Server action to submit document for review

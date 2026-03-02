@@ -6,9 +6,9 @@ import {
   createChangeRequest as dbCreateChangeRequest,
   updateChangeRequest as dbUpdateChangeRequest,
   getChangeRequestById,
-  listChangeRequests,
+  getAllChangeRequests,
 } from '@/lib/db/repositories/change-requests';
-import { createAuditLog } from '@/lib/db/repositories/audit-log';
+import { logDocumentAction } from '@/lib/db/repositories/audit-log';
 
 /**
  * Server action to create a change request
